@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MinTwitterApp.Models;
 
 namespace MinTwitterApp.Data;
 

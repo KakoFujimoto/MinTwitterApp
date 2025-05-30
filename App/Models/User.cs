@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace MinTwitterApp.Models;
 
+[Index(nameof(Email), IsUnique = true)]
 public class User
 {
     public int Id { get; set; }

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MinTwitterApp.Data;
 using MinTwitterApp.Models;
 
@@ -34,4 +35,18 @@ public class User_Test : IDisposable
         transaction.Rollback();
     }
 
+    [Fact]
+    public void DuplicateEmail_Error_Test()
+    {
+        using var transaction = db.Database.BeginTransaction();
+
+        var user1 = User.Create("User1", "test@example.com", "pw1");
+        var user2 = User.Create("User2", "test@example.com", "pw2");
+
+        db.Users.Add(user1);
+        db.Users.Add(user2);
+
+        Assert.Throws<DbUpdateException>(() => db.SaveChanges());
+
+    }
 }

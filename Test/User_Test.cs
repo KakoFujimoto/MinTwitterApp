@@ -69,7 +69,7 @@ public class User_Test : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var loggedInUser = authService.Login("test@exmaple.com", rawPassword);
+        var loggedInUser = authService.Login("test@example.com", rawPassword);
 
         Assert.NotNull(loggedInUser);
         Assert.Equal("testuser", loggedInUser!.Name);

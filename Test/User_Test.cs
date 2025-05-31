@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MinTwitterApp.Data;
 using MinTwitterApp.Models;
+using MinTwitterApp.Services;
 
 namespace MinTwitterApp.Tests;
 
@@ -58,33 +59,67 @@ public class User_Test : IDisposable
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var password = "examplepassword";
-        var user = User.Create("testuser", "test@example.com", User.HashPassword(password));
+        var passwordService = new PasswordService();
+        var authService = new AuthService(db, passwordService);
+
+        var rawPassword = "examplepassword";
+        var hashedPassword = passwordService.Hash(rawPassword);
+        var user = User.Create("testuser", "test@example.com", hashedPassword);
 
         db.Users.Add(user);
         db.SaveChanges();
 
-        var foundUser = db.Users.FirstOrDefault(u => u.Email == "test@example.com");
-        Assert.NotNull(foundUser);
-        Assert.True(foundUser!.VerifyPassword(password));
+        var loggedInUser = authService.Login("test@exmaple.com", rawPassword);
+
+        Assert.NotNull(loggedInUser);
+        Assert.Equal("testuser", loggedInUser!.Name);
 
         transaction.Rollback();
     }
 
     [Fact]
-    public void Login_Failure_Test()
+    public void Login_Failure_InvalidEmail_Test()
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var user = User.Create("testuser", "test@example.com", User.HashPassword("correctpassword"));
+        var passwordService = new PasswordService();
+        var authService = new AuthService(db, passwordService);
+
+        var rawPassWord = "examplepassword";
+        var hashedPassword = passwordService.Hash(rawPassWord);
+        var user = User.Create("testuser", "test@example.com", hashedPassword);
+
         db.Users.Add(user);
         db.SaveChanges();
 
-        var foundUser = db.Users.FirstOrDefault(u => u.Email == "test@example.com");
-        Assert.NotNull(foundUser);
-        Assert.False(foundUser!.VefifyPassword("wrongpassword"));
+        var result = authService.Login("wrong@example.com", rawPassWord);
+
+        Assert.Null(result);
 
         transaction.Rollback();
+
+    }
+
+    [Fact]
+    public void Login_Failure_InValidPassword_Test()
+    {
+        using var transaction = db.Database.BeginTransaction();
+
+        var passwordService = new PasswordService();
+        var authService = new AuthService(db, passwordService);
+
+        var rawPassWord = "examplepassword";
+        var wrongPassword = "wrongpassword";
+        var hashedPassword = passwordService.Hash(rawPassWord);
+        var user = User.Create("testuser", "test@example.com", hashedPassword);
+
+        db.Users.Add(user);
+        db.SaveChanges();
+
+        var result = authService.Login("test@example.com", wrongPassword);
+
+        Assert.Null(result);
+
     }
 
 }

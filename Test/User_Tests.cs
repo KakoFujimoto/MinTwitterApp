@@ -5,11 +5,11 @@ using MinTwitterApp.Services;
 
 namespace MinTwitterApp.Tests;
 
-public class User_Test : IDisposable
+public class User_Tests : IDisposable
 {
     private readonly ApplicationDbContext db;
 
-    public User_Test()
+    public User_Tests()
     {
         db = TestDbHelper.CreateDbContext();
     }
@@ -26,7 +26,6 @@ public class User_Test : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var user = User.Create("testuser", "test@example.com", "hashedpassword");
-
         db.Users.Add(user);
         db.SaveChanges();
 

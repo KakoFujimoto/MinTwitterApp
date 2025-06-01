@@ -1,6 +1,7 @@
 using MinTwitterApp.Data;
 using MinTwitterApp.Models;
 using MinTwitterApp.Services;
+using MinTwitterApp.Enums;
 
 namespace MinTwitterApp.Tests;
 
@@ -19,17 +20,17 @@ public class UserService_Tests : IDisposable
     }
 
     [Fact]
-    public void Regiseter_Succeeds()
+    public void Register_Succeeds()
     {
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
         var userService = new UserService(db, passwordService);
 
-        var (success, errorCode) = userService.Regiseter("TestUser", "test@example.com", "password");
+        var (success, errorCode) = userService.Register("TestUser", "test@example.com", "password");
 
         Assert.True(success);
-        Assert.Null(errorCode);
+        Assert.Equal(RegisterErrorCode.None, errorCode);
 
         var registeredUser = db.Users.FirstOrDefault(u => u.Email == "test@example.com");
         Assert.NotNull(registeredUser);
@@ -47,7 +48,7 @@ public class UserService_Tests : IDisposable
         var UserService = new UserService(db, passwordService);
 
         var existingUser = User.Create("A", "a@example.com", passwordService.Hash("pass123"));
-        db.Users.Add(existinguser);
+        db.Users.Add(existingUser);
         db.SaveChanges();
 
         var (success, errorCode) = UserService.Register("A2", "a@example.com", "pass456");

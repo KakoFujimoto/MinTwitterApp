@@ -5,20 +5,20 @@ namespace MinTwitterApp.Services;
 
 public class AuthService
 {
-    private readonly ApplicationDbContext db;
-    private readonly PasswordService passwordService;
+    private readonly ApplicationDbContext _db;
+    private readonly PasswordService _passwordService;
 
     public AuthService(ApplicationDbContext db, PasswordService passwordService)
     {
-        this.db = db;
-        this.passwordService = passwordService;
+        _db = db;
+        _passwordService = passwordService;
     }
 
     public User? Login(string email, string plainPassword)
     {
-        var user = db.Users.FirstOrDefault(u => u.Email == email);
+        var user = _db.Users.FirstOrDefault(u => u.Email == email);
         if (user == null) return null;
 
-        return passwordService.Verify(user.PassWordHash, plainPassword) ? user : null;
+        return _passwordService.Verify(user.PassWordHash, plainPassword) ? user : null;
     }
 }

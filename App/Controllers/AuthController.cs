@@ -70,6 +70,8 @@ public class AuthController : Controller
             return View(model);
         }
 
+        HttpContext.Session.SetInt32("UserId", user.Id);
+
         return RedirectToAction("Index", "Home");
 
     }

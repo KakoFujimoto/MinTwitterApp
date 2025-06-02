@@ -1,4 +1,4 @@
-namespace MinTwitterApp.Models;
+namespace MinTwitterApp.ViewModels;
 
 public class ErrorViewModel
 {

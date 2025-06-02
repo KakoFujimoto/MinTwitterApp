@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MinTwitterApp.Models;
+using MinTwitterApp.ViewModels;
 
 namespace MinTwitterApp.Controllers;
 

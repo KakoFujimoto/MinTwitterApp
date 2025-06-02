@@ -8,10 +8,12 @@ namespace MinTwitterApp.Controllers;
 public class AuthController : Controller
 {
     private readonly UserService _userService;
+    private readonly AuthService _authService;
 
-    public AuthController(UserService userService)
+    public AuthController(UserService userService, AuthService authService)
     {
         _userService = userService;
+        _authService = authService;
     }
 
     [HttpGet]
@@ -46,10 +48,30 @@ public class AuthController : Controller
 
         return RedirectToAction("Login", "Auth");
     }
-    
+
     [HttpGet]
     public IActionResult Login()
     {
         return View();
     }
+
+    [HttpPost]
+    public IActionResult Login(LoginViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = _authService.Login(model.Email, model.Password);
+        if (user == null)
+        {
+            ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。");
+            return View(model);
+        }
+
+        return RedirectToAction("Index", "Home");
+
+    }
+
 }

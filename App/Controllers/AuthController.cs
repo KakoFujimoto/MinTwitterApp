@@ -46,4 +46,10 @@ public class AuthController : Controller
 
         return RedirectToAction("Login", "Auth");
     }
+    
+    [HttpGet]
+    public IActionResult Login()
+    {
+        return View();
+    }
 }

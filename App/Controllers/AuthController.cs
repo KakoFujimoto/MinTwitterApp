@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
-using MinTwitterApp.ViewModels;
+using MinTwitterApp.DTO;
 
 namespace MinTwitterApp.Controllers;
 
@@ -23,16 +23,16 @@ public class AuthController : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(RegisterViewModel model)
+    public IActionResult Register(RegisterPageDTO model)
     {
         if (!ModelState.IsValid)
         {
             return View(model);
         }
 
-        var (success, errorCode) = _userService.Register(model.Name, model.Email, model.Password);
+        var errorCode = _userService.Register(model.Name, model.Email, model.Password);
 
-        if (!success)
+        if (errorCode != RegisterErrorCode.None)
         {
             if (errorCode == RegisterErrorCode.EmailAlreadyExists)
             {
@@ -56,7 +56,7 @@ public class AuthController : Controller
     }
 
     [HttpPost]
-    public IActionResult Login(LoginViewModel model)
+    public IActionResult Login(LoginPageDTO model)
     {
         if (!ModelState.IsValid)
         {

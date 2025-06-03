@@ -15,7 +15,8 @@ public class AuthService
     }
 
     public User? Login(string email, string plainPassword)
-    {
+    {   
+        // 20行目をUserServiceに移す
         var user = _db.Users.FirstOrDefault(u => u.Email == email);
         if (user == null) return null;
 

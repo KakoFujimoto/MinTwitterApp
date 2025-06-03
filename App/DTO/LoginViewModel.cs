@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MinTwitterApp.ViewModels;
+namespace MinTwitterApp.DTO;
 
-public class LoginViewModel
+public class LoginPageDTO
 {
     [Required]
     public string Email { get; set; } = string.Empty;

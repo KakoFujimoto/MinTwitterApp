@@ -27,9 +27,8 @@ public class UserService_Tests : IDisposable
         var passwordService = new PasswordService();
         var userService = new UserService(db, passwordService);
 
-        var (success, errorCode) = userService.Register("TestUser", "test@example.com", "password");
+        var errorCode = userService.Register("TestUser", "test@example.com", "password");
 
-        Assert.True(success);
         Assert.Equal(RegisterErrorCode.None, errorCode);
 
         var registeredUser = db.Users.FirstOrDefault(u => u.Email == "test@example.com");
@@ -51,9 +50,8 @@ public class UserService_Tests : IDisposable
         db.Users.Add(existingUser);
         db.SaveChanges();
 
-        var (success, errorCode) = UserService.Register("A2", "a@example.com", "pass456");
+        var errorCode = UserService.Register("A2", "a@example.com", "pass456");
 
-        Assert.False(success);
         Assert.Equal(RegisterErrorCode.EmailAlreadyExists, errorCode);
 
         transaction.Rollback();

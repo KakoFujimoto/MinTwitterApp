@@ -1,0 +1,16 @@
+<mxfile host="65bd71144e">
+    <diagram id="rTUN8XkPGmbRBgf2jDPT" name="ページ1">
+        <mxGraphModel dx="1117" dy="493" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="24" value="&lt;div&gt;User&lt;/div&gt;- Id : int&lt;div&gt;- Email :string&lt;/div&gt;&lt;div&gt;- Name : string&lt;/div&gt;&lt;div&gt;- PasswordHash : string&lt;/div&gt;&lt;div style=&quot;&quot;&gt;- CreatedAt : date&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;+ Create()&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=20;" vertex="1" parent="1">
+                    <mxGeometry x="329" y="70" width="170" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="&lt;div&gt;Post&lt;/div&gt;- Id : int&lt;div&gt;- Email :string&lt;/div&gt;&lt;div&gt;- Name : string&lt;/div&gt;&lt;div&gt;- PasswordHash : string&lt;/div&gt;&lt;div style=&quot;&quot;&gt;- CreatedAt : date&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;+ Create()&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=20;" vertex="1" parent="1">
+                    <mxGeometry x="120" y="100" width="170" height="170" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

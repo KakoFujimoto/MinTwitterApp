@@ -15,11 +15,11 @@ public class UserService
         _passwordService = passwordService;
     }
 
-    public (bool success, RegisterErrorCode errorCode) Register(string name, string email, string password)
+    public RegisterErrorCode Register(string name, string email, string password)
     {
         if (_db.Users.Any(u => u.Email == email))
         {
-            return (false, RegisterErrorCode.EmailAlreadyExists);
+            return RegisterErrorCode.EmailAlreadyExists;
         }
 
         var hash = _passwordService.Hash(password);
@@ -27,6 +27,6 @@ public class UserService
         _db.Users.Add(user);
         _db.SaveChanges();
 
-        return (true, RegisterErrorCode.None);
+        return RegisterErrorCode.None;
     }
 }

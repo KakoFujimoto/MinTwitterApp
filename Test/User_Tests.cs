@@ -35,7 +35,8 @@ public class User_Tests : IDisposable
 
         transaction.Rollback();
     }
-
+    
+    // EFのテストになってしまっているので不要かも
     [Fact]
     public void DuplicateEmail_Error_Test()
     {

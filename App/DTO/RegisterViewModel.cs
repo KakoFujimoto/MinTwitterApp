@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MinTwitterApp.ViewModels;
+namespace MinTwitterApp.DTO;
 
-public class RegisterViewModel
+public class RegisterPageDTO
 {
     [Required]
     public string Name { get; set; } = string.Empty;

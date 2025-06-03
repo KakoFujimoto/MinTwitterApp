@@ -76,4 +76,14 @@ public class AuthController : Controller
 
     }
 
+    [HttpPost]
+    public IActionResult Logout()
+    {
+        HttpContext.Session.Clear();
+
+        TempData["Message"] = "ログアウトしました。";
+        
+        return RedirectToAction("Login", "Auth");
+    }
+
 }

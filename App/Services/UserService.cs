@@ -29,4 +29,10 @@ public class UserService
 
         return RegisterErrorCode.None;
     }
+
+    public User? GetUserByEmail(string email)
+    {
+        return _db.Users.FirstOrDefault(u => u.Email == email);
+    }
+
 }

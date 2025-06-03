@@ -8,16 +8,18 @@ public class AuthService
     private readonly ApplicationDbContext _db;
     private readonly PasswordService _passwordService;
 
-    public AuthService(ApplicationDbContext db, PasswordService passwordService)
+    private readonly UserService _userService;
+
+    public AuthService(ApplicationDbContext db, PasswordService passwordService, UserService userService)
     {
         _db = db;
         _passwordService = passwordService;
+        _userService = userService;
     }
 
     public User? Login(string email, string plainPassword)
-    {   
-        // 20行目をUserServiceに移す
-        var user = _db.Users.FirstOrDefault(u => u.Email == email);
+    {
+        var user = _userService.GetUserByEmail(email);
         if (user == null) return null;
 
         return _passwordService.Verify(user.PassWordHash, plainPassword) ? user : null;

@@ -35,7 +35,7 @@ public class User_Tests : IDisposable
 
         transaction.Rollback();
     }
-    
+
     // EFのテストになってしまっているので不要かも
     [Fact]
     public void DuplicateEmail_Error_Test()
@@ -60,7 +60,8 @@ public class User_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
-        var authService = new AuthService(db, passwordService);
+        var userService = new UserService(db, passwordService);
+        var authService = new AuthService(db, passwordService, userService);
 
         var rawPassword = "examplepassword";
         var hashedPassword = passwordService.Hash(rawPassword);
@@ -83,7 +84,8 @@ public class User_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
-        var authService = new AuthService(db, passwordService);
+        var userService = new UserService(db, passwordService);
+        var authService = new AuthService(db, passwordService, userService);
 
         var rawPassWord = "examplepassword";
         var hashedPassword = passwordService.Hash(rawPassWord);
@@ -106,7 +108,8 @@ public class User_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
-        var authService = new AuthService(db, passwordService);
+        var userService = new UserService(db, passwordService);
+        var authService = new AuthService(db, passwordService, userService);
 
         var rawPassWord = "examplepassword";
         var wrongPassword = "wrongpassword";

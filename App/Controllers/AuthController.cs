@@ -10,10 +10,13 @@ public class AuthController : Controller
     private readonly UserService _userService;
     private readonly AuthService _authService;
 
-    public AuthController(UserService userService, AuthService authService)
+    private readonly ISessionService _sessionService;
+
+    public AuthController(UserService userService, AuthService authService, ISessionService sessionService)
     {
         _userService = userService;
         _authService = authService;
+        _sessionService = sessionService;
     }
 
     [HttpGet]
@@ -70,7 +73,7 @@ public class AuthController : Controller
             return View(model);
         }
 
-        HttpContext.Session.SetInt32("UserId", user.Id);
+        _sessionService.SetUserId(user.Id);
 
         return RedirectToAction("Index", "Home");
 
@@ -82,7 +85,7 @@ public class AuthController : Controller
         HttpContext.Session.Clear();
 
         TempData["Message"] = "ログアウトしました。";
-        
+
         return RedirectToAction("Login", "Auth");
     }
 

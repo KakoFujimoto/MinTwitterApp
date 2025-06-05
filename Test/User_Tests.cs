@@ -23,17 +23,17 @@ public class User_Tests : IDisposable
     // EFのテストになってしまっているので不要かも
     public void CreateUser_Ok_Test()
     {
-        using var transaction = db.Database.BeginTransaction();
+        // using var transaction = db.Database.BeginTransaction();
 
         var user = User.Create("testuser", "test@example.com", "hashedpassword");
-        db.Users.Add(user);
-        db.SaveChanges();
+        // db.Users.Add(user);
+        // db.SaveChanges();
 
-        var savedUser = db.Users.First();
+        // var savedUser = db.Users.First();
         Assert.Equal("testuser", savedUser.Name);
         Assert.Equal("test@example.com", savedUser.Email);
 
-        transaction.Rollback();
+        // transaction.Rollback();
     }
 
     // EFのテストになってしまっているので不要かも

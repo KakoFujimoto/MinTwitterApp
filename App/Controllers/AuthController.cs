@@ -82,7 +82,7 @@ public class AuthController : Controller
     [HttpPost]
     public IActionResult Logout()
     {
-        HttpContext.Session.Clear();
+        _sessionService.Clear();
 
         TempData["Message"] = "ログアウトしました。";
 

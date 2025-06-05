@@ -3,10 +3,12 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">MinTwitterApp</h1>
+    <p>
+        <a asp-controller="Auth" asp-action="Login" class="btn btn-link">ログインページへ</a>
+    </p>
 
-    @if (Context.Session.GetInt32("userId") != null)
+    @if (Context.Session.GetInt32("UserId") != null)
     {
         <form asp-controller="Auth" asp-action="Logout" method="post">
             <button type="submit" class="btn btn-primary">ログアウト</button>

@@ -1,6 +1,7 @@
 using MinTwitterApp.Data;
 using MinTwitterApp.Models;
 using MinTwitterApp.Enums;
+using MinTwitterApp.DTO;
 
 namespace MinTwitterApp.Services;
 
@@ -13,7 +14,7 @@ public class PostService
         _db = db;
     }
 
-    public (PostErrorCode ErrorCode, Post? Post) CreatePost(int userId, string content)
+    public (PostErrorCode, PostPageDTO?) CreatePost(int userId, string content)
     {
         if (string.IsNullOrWhiteSpace(content))
         {
@@ -30,21 +31,46 @@ public class PostService
         _db.Posts.Add(post);
         _db.SaveChanges();
 
-        return (PostErrorCode.None, post);
+        var dto = new PostPageDTO
+        {
+            Id = post.Id,
+            Content = post.Content,
+            UserId = post.UserId,
+            CreatedAt = post.CreatedAt
+        };
+
+        return (PostErrorCode.None, dto);
     }
 
-    public List<Post> GetAllPosts()
+    public List<PostPageDTO> GetAllPosts()
     {
         return _db.Posts
             .OrderByDescending(p => p.CreatedAt)
+            .Select(p => new PostPageDTO
+            {
+                Id = p.Id,
+                Content = p.Content,
+                ImagePath = p.ImagePath,
+                CreatedAt = p.CreatedAt,
+                UserId = p.UserId
+            })
             .ToList();
     }
 
-    public List<Post> GetPostById(int userId)
+    public List<PostPageDTO> GetPostById(int userId)
     {
         return _db.Posts
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.CreatedAt)
+            .Select(p => new PostPageDTO
+            {
+                Id = p.Id,
+                Content = p.Content,
+                ImagePath = p.ImagePath,
+                CreatedAt = p.CreatedAt,
+                UserId = p.UserId
+            })
             .ToList();
+
     }
 }

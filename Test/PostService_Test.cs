@@ -1,7 +1,7 @@
 using MinTwitterApp.Data;
-using MinTwitterApp.Models;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
+using MinTwitterApp.Models;
 
 namespace MinTwitterApp.Tests;
 
@@ -19,28 +19,42 @@ public class PostService_Tests : IDisposable
         db.Dispose();
     }
 
-    // CreateUser_Ok_Test()みたいなかんじで書くと意味がある
-    // ひとまず異常系はいったん放置で正常系を先にやる
     [Fact]
-    public void CreatePost_Empty_ShoudThrowException()
+    public void CreatePost_Empty_ShoudReturnError()
     {
         var postService = new PostService(db);
-        Assert.Throws<ArgumentException>(() =>
-        {
-            postService.CreatePost(1, "");
-        });
+        var (errorCode, dto) = postService.CreatePost(1, "");
+
+        Assert.Equal(PostErrorCode.ContentEmpty, errorCode);
+        Assert.Null(dto);
     }
 
     [Fact]
-
     public void CreatePost_Ok_Test()
     {
-        var postService = new PostService(db);
-        var result = postService.CreatePost(1, "テスト投稿");
+        using var transaction = db.Database.BeginTransaction();
 
-        Assert.NotNull(result);
-        Assert.Equal(1, result.UserId);
-        Assert.Equal("テスト投稿", result.Content);
+        var user = new User
+        {
+            Name = "テストユーザー",
+            Email = "test@example.com",
+            PassWordHash = "dummyhash"
+        };
+
+        db.Users.Add(user);
+        db.SaveChanges();
+        var postService = new PostService(db);
+
+        var result = postService.CreatePost(1, "テスト投稿");
+        var errorCode = result.Item1;
+        var dto = result.Item2;
+
+        Assert.Equal(PostErrorCode.None, errorCode);
+        Assert.NotNull(dto);
+        Assert.Equal(1, dto!.UserId);
+        Assert.Equal("テスト投稿", dto.Content);
+
+        transaction.Rollback();
     }
 
 }

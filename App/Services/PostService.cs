@@ -2,12 +2,15 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Models;
 using MinTwitterApp.Enums;
 using MinTwitterApp.DTO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 
 namespace MinTwitterApp.Services;
 
 public class PostService
 {
     private readonly ApplicationDbContext _db;
+    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
 
     public PostService(ApplicationDbContext db)
     {
@@ -20,10 +23,36 @@ public class PostService
 
         if (imageFile != null && imageFile.Length > 0)
         {
+            var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+            if (!AllowedExtensions.Contains(ext))
+            {
+                return (PostErrorCode.InvalidImageExtension, null);
+            }
+
+            try
+            {
+                using var imageStream = imageFile.OpenReadStream();
+                IImageFormat? format = Image.DetectFormat(imageStream);
+
+                if (format == null ||
+                    (format.Name != "JPEG" && format.Name != "PNG" && format.Name != "GIF"))
+                {
+                    return (PostErrorCode.InvalidImageFormat, null);
+                }
+            }
+            catch (UnknownImageFormatException)
+            {
+                return (PostErrorCode.InvalidImageFormat, null);
+            }
+            catch (Exception)
+            {
+                return (PostErrorCode.ImageReadError, null);
+            }
+
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             Directory.CreateDirectory(uploadsFolder);
 
-            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var uniqueFileName = Guid.NewGuid().ToString() + ext;
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -33,6 +62,7 @@ public class PostService
 
             savedImagePath = "/uploads/" + uniqueFileName;
         }
+
         if (string.IsNullOrWhiteSpace(content))
         {
             return (PostErrorCode.ContentEmpty, null);
@@ -90,6 +120,5 @@ public class PostService
                 UserId = p.UserId
             })
             .ToList();
-
     }
 }

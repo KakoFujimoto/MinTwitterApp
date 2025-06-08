@@ -3,5 +3,8 @@ namespace MinTwitterApp.Enums;
 public enum PostErrorCode
 {
     None,
-    ContentEmpty
+    ContentEmpty,
+    InvalidImageExtension,
+    InvalidImageFormat,
+    ImageReadError
 }

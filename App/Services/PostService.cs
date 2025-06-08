@@ -106,7 +106,7 @@ public class PostService
             .ToList();
     }
 
-    public List<PostPageDTO> GetPostById(int userId)
+    public List<PostPageDTO> GetPostByUserId(int userId)
     {
         return _db.Posts
             .Where(p => p.UserId == userId)

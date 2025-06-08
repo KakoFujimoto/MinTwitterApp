@@ -19,7 +19,11 @@ public class PostController : Controller
     [HttpGet]
     public IActionResult Create()
     {
-        return View();
+        var dto = new PostCreateDTO
+        {
+            Posts = _postService.GetAllPosts()
+        };
+        return View(dto);
     }
 
     [HttpPost]
@@ -33,18 +37,23 @@ public class PostController : Controller
         }
 
         if (!ModelState.IsValid)
+        {
+            dto.Posts = _postService.GetAllPosts();
             return View(dto);
+        }
 
         var (errorCode, resultDto) = _postService.CreatePost(userId.Value, dto.Content);
 
         if (errorCode == Enums.PostErrorCode.ContentEmpty)
         {
             ModelState.AddModelError(nameof(dto.Content), "内容を入力してください。");
+            dto.Posts = _postService.GetAllPosts();
             return View(dto);
         }
         else if (errorCode != Enums.PostErrorCode.None)
         {
             ModelState.AddModelError("", "投稿に失敗しました。");
+            dto.Posts = _postService.GetAllPosts();
             return View(dto);
         }
         return RedirectToAction("Index", "Home");

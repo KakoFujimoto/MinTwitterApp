@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.DTO;
-using MinTwitterApp.Models;
 
 namespace MinTwitterApp.Controllers;
 
@@ -56,6 +55,6 @@ public class PostController : Controller
             dto.Posts = _postService.GetAllPosts();
             return View(dto);
         }
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Create", "Post");
     }
 }

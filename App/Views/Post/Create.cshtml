@@ -36,7 +36,9 @@
             </li>
             @if (!string.IsNullOrEmpty(post.ImagePath))
             {
-                <img src="@post.ImagePath">
+                <a href="@post.ImagePath" target="_blank">
+                    <img src="@post.ImagePath" class="post-image">
+                </a>
             }
         }
     </ul>

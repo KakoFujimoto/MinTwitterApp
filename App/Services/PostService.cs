@@ -14,8 +14,25 @@ public class PostService
         _db = db;
     }
 
-    public (PostErrorCode, PostPageDTO?) CreatePost(int userId, string content)
+    public (PostErrorCode, PostPageDTO?) CreatePost(int userId, string content, IFormFile? imageFile)
     {
+        string? savedImagePath = null;
+
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                imageFile.CopyTo(stream);
+            }
+
+            savedImagePath = "/uploads/" + uniqueFileName;
+        }
         if (string.IsNullOrWhiteSpace(content))
         {
             return (PostErrorCode.ContentEmpty, null);
@@ -25,7 +42,8 @@ public class PostService
         {
             UserId = userId,
             Content = content,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
+            ImagePath = savedImagePath
         };
 
         _db.Posts.Add(post);
@@ -35,6 +53,7 @@ public class PostService
         {
             Id = post.Id,
             Content = post.Content,
+            ImagePath = post.ImagePath,
             UserId = post.UserId,
             CreatedAt = post.CreatedAt
         };

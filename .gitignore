@@ -9,3 +9,6 @@ App/obj/
 # Test 以下の bin/ と obj/
 Test/**/bin/
 Test/**/obj/
+
+# アップロード画像（ユーザーがアップしたもの）
+App/wwwroot/uploads/

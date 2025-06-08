@@ -75,7 +75,7 @@ public class AuthController : Controller
 
         _sessionService.SetUserId(user.Id);
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Create", "Post");
 
     }
 

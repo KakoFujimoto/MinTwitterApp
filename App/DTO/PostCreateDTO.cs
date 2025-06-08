@@ -8,5 +8,5 @@ public class PostCreateDTO
     [StringLength(280, ErrorMessage = "内容は280文字以内で入力してください。")]
     public string Content { get; set; } = string.Empty;
 
-    public List<PostPageDTO>? Posts { get; set; }
+    public List<PostPageDTO> Posts { get; set; } = new();
 }

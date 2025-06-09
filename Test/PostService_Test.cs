@@ -23,10 +23,11 @@ public class PostService_Tests : IDisposable
     public void CreatePost_Empty_ShoudReturnError()
     {
         var postService = new PostService(db);
-        var (errorCode, dto) = postService.CreatePost(1, "");
 
-        Assert.Equal(PostErrorCode.ContentEmpty, errorCode);
-        Assert.Null(dto);
+        var result = postService.CreatePost(1, "", null);
+
+        Assert.Equal(PostErrorCode.ContentEmpty, result.ErrorCode);
+        Assert.Null(result.Post);
     }
 
     [Fact]
@@ -43,16 +44,15 @@ public class PostService_Tests : IDisposable
 
         db.Users.Add(user);
         db.SaveChanges();
+
         var postService = new PostService(db);
 
-        var result = postService.CreatePost(1, "テスト投稿");
-        var errorCode = result.Item1;
-        var dto = result.Item2;
+        var result = postService.CreatePost(1, "テスト投稿", null);
 
-        Assert.Equal(PostErrorCode.None, errorCode);
-        Assert.NotNull(dto);
-        Assert.Equal(1, dto!.UserId);
-        Assert.Equal("テスト投稿", dto.Content);
+        Assert.Equal(PostErrorCode.None, result.ErrorCode);
+        Assert.NotNull(result.Post);
+        Assert.Equal(1, result.Post!.UserId);
+        Assert.Equal("テスト投稿", result.Post.Content);
 
         transaction.Rollback();
     }

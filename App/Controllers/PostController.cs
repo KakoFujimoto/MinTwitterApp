@@ -41,7 +41,7 @@ public class PostController : Controller
             return View(dto);
         }
 
-        var (errorCode, resultDto) = _postService.CreatePost(userId.Value, dto.Content, dto.ImageFile);
+        var (errorCode, post) = _postService.CreatePost(userId.Value, dto.Content, dto.ImageFile);
 
         if (errorCode == Enums.PostErrorCode.ContentEmpty)
         {

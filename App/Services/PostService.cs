@@ -17,7 +17,7 @@ public class PostService
         _db = db;
     }
 
-    public (PostErrorCode, PostPageDTO?) CreatePost(int userId, string content, IFormFile? imageFile)
+    public (PostErrorCode ErrorCode, PostPageDTO? Post) CreatePost(int userId, string content, IFormFile? imageFile)
     {
         if (string.IsNullOrWhiteSpace(content))
         {

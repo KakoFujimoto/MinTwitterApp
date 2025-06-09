@@ -19,6 +19,11 @@ public class PostService
 
     public (PostErrorCode, PostPageDTO?) CreatePost(int userId, string content, IFormFile? imageFile)
     {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return (PostErrorCode.ContentEmpty, null);
+        }
+
         string? savedImagePath = null;
 
         if (imageFile != null && imageFile.Length > 0)
@@ -39,6 +44,21 @@ public class PostService
                 {
                     return (PostErrorCode.InvalidImageFormat, null);
                 }
+
+                imageStream.Position = 0;
+
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + ext;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var output = new FileStream(filePath, FileMode.Create))
+                {
+                    imageStream.CopyTo(output);
+                }
+
+                savedImagePath = "/uploads/" + uniqueFileName;
             }
             catch (UnknownImageFormatException)
             {
@@ -48,24 +68,6 @@ public class PostService
             {
                 return (PostErrorCode.ImageReadError, null);
             }
-
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = Guid.NewGuid().ToString() + ext;
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                imageFile.CopyTo(stream);
-            }
-
-            savedImagePath = "/uploads/" + uniqueFileName;
-        }
-
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            return (PostErrorCode.ContentEmpty, null);
         }
 
         var post = new Post

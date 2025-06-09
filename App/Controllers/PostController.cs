@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MinTwitterApp.Controllers;
 
+// [Authorize]
 public class PostController : Controller
 {
     private readonly PostService _postService;
@@ -29,19 +31,15 @@ public class PostController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Create(PostCreateDTO dto)
     {
-        var userId = _sessionService.GetUserId();
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-
         if (!ModelState.IsValid)
         {
             dto.Posts = _postService.GetAllPosts();
             return View(dto);
         }
 
-        var (errorCode, post) = _postService.CreatePost(userId.Value, dto.Content, dto.ImageFile);
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+
+        var (errorCode, post) = _postService.CreatePost(userId, dto.Content, dto.ImageFile);
 
         if (errorCode == Enums.PostErrorCode.ContentEmpty)
         {

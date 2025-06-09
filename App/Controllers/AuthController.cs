@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MinTwitterApp.Controllers;
 
@@ -19,12 +20,14 @@ public class AuthController : Controller
         _sessionService = sessionService;
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public IActionResult Register()
     {
         return View();
     }
 
+    [AllowAnonymous]
     [HttpPost]
     public IActionResult Register(RegisterPageDTO model)
     {
@@ -52,12 +55,14 @@ public class AuthController : Controller
         return RedirectToAction("Login", "Auth");
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public IActionResult Login()
     {
         return View();
     }
 
+    [AllowAnonymous]
     [HttpPost]
     public IActionResult Login(LoginPageDTO model)
     {
@@ -79,6 +84,7 @@ public class AuthController : Controller
 
     }
 
+    [Authorize]
     [HttpPost]
     public IActionResult Logout()
     {

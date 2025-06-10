@@ -3,6 +3,8 @@ using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.DTO;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace MinTwitterApp.Controllers;
 
@@ -57,17 +59,19 @@ public class AuthController : Controller
 
     [AllowAnonymous]
     [HttpGet]
-    public IActionResult Login()
+    public IActionResult Login(string? returnUrl = null)
     {
+        ViewBag.ReturnUrl = returnUrl;
         return View();
     }
 
     [AllowAnonymous]
     [HttpPost]
-    public IActionResult Login(LoginPageDTO model)
+    public async Task<IActionResult> Login(LoginPageDTO model, string? returnUrl = null)
     {
         if (!ModelState.IsValid)
         {
+            ViewBag.ReturnUrl = returnUrl;
             return View(model);
         }
 
@@ -75,23 +79,41 @@ public class AuthController : Controller
         if (user == null)
         {
             ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。");
+            ViewBag.ReturnUrl = returnUrl;
             return View(model);
         }
 
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
+
+        var identity = new ClaimsIdentity(claims, "MyCookieAuth");
+        var principal = new ClaimsPrincipal(identity);
+
+        await HttpContext.SignInAsync("MyCookieAuth", principal);
+
         _sessionService.SetUserId(user.Id);
 
-        return RedirectToAction("Create", "Post");
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
 
+
+        return RedirectToAction("Create", "Post");
     }
 
     [Authorize]
     [HttpPost]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
+        await HttpContext.SignOutAsync("MyCookieAuth");
         _sessionService.Clear();
 
         TempData["Message"] = "ログアウトしました。";
-
         return RedirectToAction("Login", "Auth");
     }
 

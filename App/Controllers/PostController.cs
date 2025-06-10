@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace MinTwitterApp.Controllers;
 
-// [Authorize]
+[Authorize]
 public class PostController : Controller
 {
     private readonly PostService _postService;

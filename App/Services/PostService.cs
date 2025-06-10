@@ -110,10 +110,9 @@ public class PostService
             .ToListAsync();
     }
 
-    // Asyncに
-    public List<PostPageDTO> GetPostByUserId(int userId)
+    public async Task<List<PostPageDTO>> GetPostByUserIdAsync(int userId)
     {
-        return _db.Posts
+        return await _db.Posts
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new PostPageDTO
@@ -124,6 +123,6 @@ public class PostService
                 CreatedAt = p.CreatedAt,
                 UserId = p.UserId
             })
-            .ToList();
+            .ToListAsync();
     }
 }

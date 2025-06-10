@@ -16,26 +16,26 @@ public class UserService
         _passwordService = passwordService;
     }
 
-public async Task<RegisterErrorCode> RegisterAsync(string name, string email, string password)
+    public async Task<UserRegisterErrorCode> RegisterAsync(string name, string email, string password)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            return RegisterErrorCode.NameEmpty;
+            return UserRegisterErrorCode.NameEmpty;
         }
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            return RegisterErrorCode.EmailEmpty;
+            return UserRegisterErrorCode.EmailEmpty;
         }
 
         if (string.IsNullOrWhiteSpace(password))
         {
-            return RegisterErrorCode.PasswordEmpty;
+            return UserRegisterErrorCode.PasswordEmpty;
         }
 
         if (await _db.Users.AnyAsync(u => u.Email == email))
         {
-            return RegisterErrorCode.EmailAlreadyExists;
+            return UserRegisterErrorCode.EmailAlreadyExists;
         }
 
         var hash = _passwordService.Hash(password);
@@ -47,13 +47,13 @@ public async Task<RegisterErrorCode> RegisterAsync(string name, string email, st
         }
         catch
         {
-            return RegisterErrorCode.UnknownError;
+            return UserRegisterErrorCode.UnknownError;
         }
 
         await _db.Users.AddAsync(user);
         await _db.SaveChangesAsync();
 
-        return RegisterErrorCode.None;
+        return UserRegisterErrorCode.None;
     }
 
     public async Task<User?> GetUserByEmailAsync(string email)

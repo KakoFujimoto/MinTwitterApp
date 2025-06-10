@@ -40,9 +40,9 @@ public class AuthController : Controller
 
         var errorCode = await _userService.RegisterAsync(model.Name, model.Email, model.Password);
 
-        if (errorCode != RegisterErrorCode.None)
+        if (errorCode != UserRegisterErrorCode.None)
         {
-            if (errorCode == RegisterErrorCode.EmailAlreadyExists)
+            if (errorCode == UserRegisterErrorCode.EmailAlreadyExists)
             {
                 ModelState.AddModelError("Email", "このメールアドレスは既に登録されています。");
             }

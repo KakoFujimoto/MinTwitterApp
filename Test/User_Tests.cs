@@ -123,18 +123,18 @@ public class User_Tests : IDisposable
 
         var result = await userService.RegisterAsync("", "test@example.com", "validPassword");
 
-        Assert.Equal(RegisterErrorCode.NameEmpty, result);
+        Assert.Equal(UserRegisterErrorCode.NameEmpty, result);
     }
 
     [Fact]
-    public async Task Register_EmailEmpty_ReturnsInvalidEmailFormatError()
+    public async Task Register_EmailEmpty_ReturnsEmailEmptyError()
     {
         var passwordService = new PasswordService();
         var userService = new UserService(db, passwordService);
 
         var result = await userService.RegisterAsync("testuser", " ", "validPassword");
 
-        Assert.Equal(RegisterErrorCode.InvalidEmailFormat, result);
+        Assert.Equal(UserRegisterErrorCode.EmailEmpty, result);
     }
 
 }

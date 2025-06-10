@@ -1,7 +1,6 @@
 namespace MinTwitterApp.Enums;
 
-// 命名が微妙 UserErrorCodeだと？ UserRegisterErrorCodeにする？
-public enum RegisterErrorCode
+public enum UserRegisterErrorCode
 {
     None,
     NameEmpty,

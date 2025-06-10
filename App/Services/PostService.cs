@@ -110,6 +110,7 @@ public class PostService
             .ToListAsync();
     }
 
+    // Asyncに
     public List<PostPageDTO> GetPostByUserId(int userId)
     {
         return _db.Posts

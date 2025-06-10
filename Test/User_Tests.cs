@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MinTwitterApp.Data;
 using MinTwitterApp.Models;
 using MinTwitterApp.Services;
+using MinTwitterApp.Enums;
 
 namespace MinTwitterApp.Tests;
 
@@ -20,23 +21,13 @@ public class User_Tests : IDisposable
     }
 
     [Fact]
-    // EFのテストになってしまっているので不要かも
     public void CreateUser_Ok_Test()
     {
-        // using var transaction = db.Database.BeginTransaction();
-
         var user = User.Create("testuser", "test@example.com", "hashedpassword");
-        // db.Users.Add(user);
-        // db.SaveChanges();
+        // これから
 
-        // var savedUser = db.Users.First();
-        // Assert.Equal("testuser", savedUser.Name);
-        // Assert.Equal("test@example.com", savedUser.Email);
-
-        // transaction.Rollback();
     }
 
-    // EFのテストになってしまっているので不要かも
     [Fact]
     public void DuplicateEmail_Error_Test()
     {
@@ -51,11 +42,10 @@ public class User_Tests : IDisposable
         Assert.Throws<DbUpdateException>(() => db.SaveChanges());
 
         transaction.Rollback();
-
     }
 
     [Fact]
-    public void Login_Successful_Test()
+    public async Task Login_Successful_Test()
     {
         using var transaction = db.Database.BeginTransaction();
 
@@ -70,7 +60,7 @@ public class User_Tests : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var loggedInUser = authService.Login("test@example.com", rawPassword);
+        var loggedInUser = await authService.LoginAsync("test@example.com", rawPassword);
 
         Assert.NotNull(loggedInUser);
         Assert.Equal("testuser", loggedInUser!.Name);
@@ -79,7 +69,7 @@ public class User_Tests : IDisposable
     }
 
     [Fact]
-    public void Login_Failure_InvalidEmail_Test()
+    public async Task Login_Failure_InvalidEmail_Test()
     {
         using var transaction = db.Database.BeginTransaction();
 
@@ -87,23 +77,22 @@ public class User_Tests : IDisposable
         var userService = new UserService(db, passwordService);
         var authService = new AuthService(db, passwordService, userService);
 
-        var rawPassWord = "examplepassword";
-        var hashedPassword = passwordService.Hash(rawPassWord);
+        var rawPassword = "examplepassword";
+        var hashedPassword = passwordService.Hash(rawPassword);
         var user = User.Create("testuser", "test@example.com", hashedPassword);
 
         db.Users.Add(user);
         db.SaveChanges();
 
-        var result = authService.Login("wrong@example.com", rawPassWord);
+        var result = await authService.LoginAsync("wrong@example.com", rawPassword);
 
         Assert.Null(result);
 
         transaction.Rollback();
-
     }
 
     [Fact]
-    public void Login_Failure_InValidPassword_Test()
+    public async Task Login_Failure_InValidPassword_Test()
     {
         using var transaction = db.Database.BeginTransaction();
 
@@ -111,18 +100,41 @@ public class User_Tests : IDisposable
         var userService = new UserService(db, passwordService);
         var authService = new AuthService(db, passwordService, userService);
 
-        var rawPassWord = "examplepassword";
+        var rawPassword = "examplepassword";
         var wrongPassword = "wrongpassword";
-        var hashedPassword = passwordService.Hash(rawPassWord);
+        var hashedPassword = passwordService.Hash(rawPassword);
         var user = User.Create("testuser", "test@example.com", hashedPassword);
 
         db.Users.Add(user);
         db.SaveChanges();
 
-        var result = authService.Login("test@example.com", wrongPassword);
+        var result = await authService.LoginAsync("test@example.com", wrongPassword);
 
         Assert.Null(result);
 
+        transaction.Rollback();
+    }
+
+    [Fact]
+    public async Task Register_NameEmpty_ReturnsNameEmptyError()
+    {
+        var passwordService = new PasswordService();
+        var userService = new UserService(db, passwordService);
+
+        var result = await userService.RegisterAsync("", "test@example.com", "validPassword");
+
+        Assert.Equal(RegisterErrorCode.NameEmpty, result);
+    }
+
+    [Fact]
+    public async Task Register_EmailEmpty_ReturnsInvalidEmailFormatError()
+    {
+        var passwordService = new PasswordService();
+        var userService = new UserService(db, passwordService);
+
+        var result = await userService.RegisterAsync("testuser", " ", "validPassword");
+
+        Assert.Equal(RegisterErrorCode.InvalidEmailFormat, result);
     }
 
 }

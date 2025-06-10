@@ -37,9 +37,18 @@ public class PostController : Controller
             return View(dto);
         }
 
-        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var inputUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        int result;
+        bool success;
 
-        var (errorCode, post) = await _postService.CreatePostAsync(userId, dto.Content, dto.ImageFile);
+        success = int.TryParse(inputUserId,out result);
+
+        if (!success)
+        {
+            return Unauthorized();
+        }
+
+        var (errorCode, post) = await _postService.CreatePostAsync(result, dto.Content, dto.ImageFile);
 
         if (errorCode == Enums.PostErrorCode.ContentEmpty)
         {

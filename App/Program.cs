@@ -24,6 +24,7 @@ builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<PostService>();
+builder.Services.AddScoped<UserErrorService>();
 
 builder.Services.AddAuthentication("MyCookieAuth")
     .AddCookie("MyCookieAuth", options =>
@@ -50,7 +51,7 @@ app.UseRouting();
 
 app.UseSession();
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

@@ -10,32 +10,30 @@ public class UserService
     private readonly ApplicationDbContext _db;
     private readonly PasswordService _passwordService;
 
-    public UserService(ApplicationDbContext db, PasswordService passwordService)
+    private readonly UserErrorService _userErrorService;
+
+    public UserService(
+        ApplicationDbContext db,
+        PasswordService passwordService,
+        UserErrorService userErrorService)
     {
         _db = db;
         _passwordService = passwordService;
+        _userErrorService = userErrorService;
     }
 
-    public async Task<UserRegisterErrorCode> RegisterAsync(string name, string email, string password)
+    public async Task<UserRegisterErrorCode> RegisterAsync
+        (
+            string name,
+            string email,
+            string password
+        )
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return UserRegisterErrorCode.NameEmpty;
-        }
+        var validationResult = await _userErrorService.ValidateUserInputAsync(name, email, password);
 
-        if (string.IsNullOrWhiteSpace(email))
+        if (validationResult != UserRegisterErrorCode.None)
         {
-            return UserRegisterErrorCode.EmailEmpty;
-        }
-
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            return UserRegisterErrorCode.PasswordEmpty;
-        }
-
-        if (await _db.Users.AnyAsync(u => u.Email == email))
-        {
-            return UserRegisterErrorCode.EmailAlreadyExists;
+            return validationResult;
         }
 
         var hash = _passwordService.Hash(password);

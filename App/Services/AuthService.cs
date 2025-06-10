@@ -17,9 +17,9 @@ public class AuthService
         _userService = userService;
     }
 
-    public User? Login(string email, string plainPassword)
+    public async Task<User?> LoginAsync(string email, string plainPassword)
     {
-        var user = _userService.GetUserByEmail(email);
+        var user = await _userService.GetUserByEmailAsync(email);
         if (user == null) return null;
 
         return _passwordService.Verify(user.PassWordHash, plainPassword) ? user : null;

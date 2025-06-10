@@ -31,14 +31,14 @@ public class AuthController : Controller
 
     [AllowAnonymous]
     [HttpPost]
-    public IActionResult Register(RegisterPageDTO model)
+    public async Task<IActionResult> Register(RegisterPageDTO model)
     {
         if (!ModelState.IsValid)
         {
             return View(model);
         }
 
-        var errorCode = _userService.Register(model.Name, model.Email, model.Password);
+        var errorCode = await _userService.RegisterAsync(model.Name, model.Email, model.Password);
 
         if (errorCode != RegisterErrorCode.None)
         {
@@ -75,7 +75,7 @@ public class AuthController : Controller
             return View(model);
         }
 
-        var user = _authService.Login(model.Email, model.Password);
+        var user = await _authService.LoginAsync(model.Email, model.Password);
         if (user == null)
         {
             ModelState.AddModelError("", "メールアドレスまたはパスワードが正しくありません。");
@@ -85,9 +85,9 @@ public class AuthController : Controller
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Name),
-            new Claim(ClaimTypes.Email, user.Email)
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.Name),
+            new(ClaimTypes.Email, user.Email)
         };
 
         var identity = new ClaimsIdentity(claims, "MyCookieAuth");

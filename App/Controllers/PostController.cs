@@ -18,39 +18,39 @@ public class PostController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
         var dto = new PostCreateDTO
         {
-            Posts = _postService.GetAllPosts()
+            Posts = await _postService.GetAllPostsAsync()
         };
         return View(dto);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(PostCreateDTO dto)
+    public async Task<IActionResult> Create(PostCreateDTO dto)
     {
         if (!ModelState.IsValid)
         {
-            dto.Posts = _postService.GetAllPosts();
+            dto.Posts = await _postService.GetAllPostsAsync();
             return View(dto);
         }
 
         var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
 
-        var (errorCode, post) = _postService.CreatePost(userId, dto.Content, dto.ImageFile);
+        var (errorCode, post) = await _postService.CreatePostAsync(userId, dto.Content, dto.ImageFile);
 
         if (errorCode == Enums.PostErrorCode.ContentEmpty)
         {
             ModelState.AddModelError(nameof(dto.Content), "内容を入力してください。");
-            dto.Posts = _postService.GetAllPosts();
+            dto.Posts = await _postService.GetAllPostsAsync();
             return View(dto);
         }
         else if (errorCode != Enums.PostErrorCode.None)
         {
             ModelState.AddModelError("", "投稿に失敗しました。");
-            dto.Posts = _postService.GetAllPosts();
+            dto.Posts = await _postService.GetAllPostsAsync();
             return View(dto);
         }
         return RedirectToAction("Create", "Post");

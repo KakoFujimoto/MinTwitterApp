@@ -4,6 +4,8 @@ using MinTwitterApp.Enums;
 using MinTwitterApp.DTO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace MinTwitterApp.Services;
 
@@ -17,7 +19,7 @@ public class PostService
         _db = db;
     }
 
-    public (PostErrorCode ErrorCode, PostPageDTO? Post) CreatePost(int userId, string content, IFormFile? imageFile)
+    public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> CreatePostAsync(int userId, string content, IFormFile? imageFile)
     {
         if (string.IsNullOrWhiteSpace(content))
         {
@@ -79,7 +81,7 @@ public class PostService
         };
 
         _db.Posts.Add(post);
-        _db.SaveChanges();
+        await _db.SaveChangesAsync();
 
         var dto = new PostPageDTO
         {
@@ -93,9 +95,9 @@ public class PostService
         return (PostErrorCode.None, dto);
     }
 
-    public List<PostPageDTO> GetAllPosts()
+    public async Task<List<PostPageDTO>> GetAllPostsAsync()
     {
-        return _db.Posts
+        return await _db.Posts
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new PostPageDTO
             {
@@ -105,7 +107,7 @@ public class PostService
                 CreatedAt = p.CreatedAt,
                 UserId = p.UserId
             })
-            .ToList();
+            .ToListAsync();
     }
 
     public List<PostPageDTO> GetPostByUserId(int userId)

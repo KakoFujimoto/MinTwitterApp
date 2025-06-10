@@ -1,6 +1,7 @@
 using MinTwitterApp.Data;
 using MinTwitterApp.Models;
 using MinTwitterApp.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace MinTwitterApp.Services;
 
@@ -15,24 +16,24 @@ public class UserService
         _passwordService = passwordService;
     }
 
-    public RegisterErrorCode Register(string name, string email, string password)
+    public async Task<RegisterErrorCode> RegisterAsync(string name, string email, string password)
     {
-        if (_db.Users.Any(u => u.Email == email))
+        if (await _db.Users.AnyAsync(u => u.Email == email))
         {
             return RegisterErrorCode.EmailAlreadyExists;
         }
 
         var hash = _passwordService.Hash(password);
         var user = User.Create(name, email, hash);
-        _db.Users.Add(user);
-        _db.SaveChanges();
+        await _db.Users.AddAsync(user);
+        await _db.SaveChangesAsync();
 
         return RegisterErrorCode.None;
     }
 
-    public User? GetUserByEmail(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
-        return _db.Users.FirstOrDefault(u => u.Email == email);
+        return await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
 }

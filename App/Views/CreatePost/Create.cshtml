@@ -1,4 +1,4 @@
-@model MinTwitterApp.DTO.PostCreateDTO
+@model MinTwitterApp.DTO.CreatePostDTO
 
 @{
     ViewData["Title"] = "新規投稿";
@@ -6,7 +6,7 @@
 <h2>NewPost</h2>
 
 <div asp-validation-summary="All" class="text-danger"></div>
-<form asp-action="Create" method="post" enctype="multipart/form-data">
+<form asp-controller="CreatePost" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label asp-for="Content" class="control-label">内容</label>
         <textarea asp-for="Content" class="form-control"></textarea>
@@ -33,13 +33,13 @@
             <li class="list-group-item">
                 <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
                 @post.Content
-            
-            @if (!string.IsNullOrEmpty(post.ImagePath))
-            {
-                <a href="@post.ImagePath" target="_blank">
-                    <img src="@post.ImagePath" class="post-image">
-                </a>
-            }
+
+                @if (!string.IsNullOrEmpty(post.ImagePath))
+                {
+                    <a href="@post.ImagePath" target="_blank">
+                        <img src="@post.ImagePath" class="post-image">
+                    </a>
+                }
             </li>
         }
     </ul>

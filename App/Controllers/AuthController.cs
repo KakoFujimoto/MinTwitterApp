@@ -103,7 +103,7 @@ public class AuthController : Controller
         }
 
 
-        return RedirectToAction("Create", "Post");
+        return RedirectToAction("Index", "CreatePost");
     }
 
     [Authorize]

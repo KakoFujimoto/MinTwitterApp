@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MinTwitterApp.Services;
 
-public class PostService
+public class ViewPostService
 {
     private readonly ApplicationDbContext _db;
 
-    public PostService(ApplicationDbContext db)
+    public ViewPostService(ApplicationDbContext db)
     {
         _db = db;
     }
@@ -28,7 +28,7 @@ public class PostService
             .ToListAsync();
     }
 
-    public async Task<List<PostPageDTO>> GetPostByUserIdAsync(int userId)
+    public async Task<List<PostPageDTO>> GetPostsByUserIdAsync(int userId)
     {
         return await _db.Posts
             .Where(p => p.UserId == userId)

@@ -10,15 +10,24 @@ public class CreatePostController : Controller
 {
     private readonly CreatePostService _createPostService;
 
-    public CreatePostController(CreatePostService createPostService)
+    private readonly ViewPostService _viewPostService;
+
+    public CreatePostController(CreatePostService createPostService, ViewPostService viewPostService)
     {
         _createPostService = createPostService;
+        _viewPostService = viewPostService;
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View("Create", new CreatePostDTO());
+        var posts = await _viewPostService.GetAllPostsAsync();
+        var dto = new CreatePostDTO
+        {
+            Posts = posts
+        };
+
+        return View("Create", dto);
     }
 
     [HttpPost]

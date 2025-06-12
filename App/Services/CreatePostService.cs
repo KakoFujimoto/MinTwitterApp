@@ -2,73 +2,33 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
-using Microsoft.EntityFrameworkCore;
 
 namespace MinTwitterApp.Services;
 
 public class CreatePostService
 {
     private readonly ApplicationDbContext _db;
-    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+    private readonly PostErrorService _postErrorService;
 
-    public CreatePostService(ApplicationDbContext db)
+    public CreatePostService(ApplicationDbContext db, PostErrorService postErrorService)
     {
         _db = db;
+        _postErrorService = postErrorService;
     }
 
     public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> CreateAsync(int userId, string content, IFormFile? imageFile)
     {
-        if (string.IsNullOrWhiteSpace(content))
+
+        var contentError = _postErrorService.ValidateContent(content);
+        if (contentError != PostErrorCode.None)
         {
-            return (PostErrorCode.ContentEmpty, null);
+            return (contentError, null);
         }
 
-        string? savedImagePath = null;
-
-        if (imageFile != null && imageFile.Length > 0)
+        var (imageError, savedImagePath) = await _postErrorService.ValidateAndSaveImageAsync(imageFile);
+        if (imageError != PostErrorCode.None)
         {
-            var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-            if (!AllowedExtensions.Contains(ext))
-            {
-                return (PostErrorCode.InvalidImageExtension, null);
-            }
-
-            try
-            {
-                using var imageStream = imageFile.OpenReadStream();
-                IImageFormat? format = Image.DetectFormat(imageStream);
-
-                if (format == null ||
-                    (format.Name != "JPEG" && format.Name != "PNG" && format.Name != "GIF"))
-                {
-                    return (PostErrorCode.InvalidImageFormat, null);
-                }
-
-                imageStream.Position = 0;
-
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = Guid.NewGuid().ToString() + ext;
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var output = new FileStream(filePath, FileMode.Create))
-                {
-                    imageStream.CopyTo(output);
-                }
-
-                savedImagePath = "/uploads/" + uniqueFileName;
-            }
-            catch (UnknownImageFormatException)
-            {
-                return (PostErrorCode.InvalidImageFormat, null);
-            }
-            catch (Exception)
-            {
-                return (PostErrorCode.ImageReadError, null);
-            }
+            return (imageError, null);
         }
 
         var post = new Post

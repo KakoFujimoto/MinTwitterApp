@@ -26,6 +26,8 @@ builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<UserErrorService>();
 builder.Services.AddScoped<CreatePostService>();
 builder.Services.AddScoped<ViewPostService>();
+builder.Services.AddScoped<PostErrorService>();
+builder.Services.AddScoped<CreatePostService>();
 
 
 builder.Services.AddAuthentication("MyCookieAuth")

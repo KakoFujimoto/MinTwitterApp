@@ -36,6 +36,7 @@ public class CreatePostController : Controller
     {
         if (!ModelState.IsValid)
         {
+            dto.Posts = await _viewPostService.GetAllPostsAsync();
             return View("Create", dto);
         }
 
@@ -58,6 +59,7 @@ public class CreatePostController : Controller
 
         if (!ModelState.IsValid)
         {
+            dto.Posts = await _viewPostService.GetAllPostsAsync();
             return View("Create", dto);
         }
 

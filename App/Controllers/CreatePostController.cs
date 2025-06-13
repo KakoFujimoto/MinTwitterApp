@@ -12,10 +12,16 @@ public class CreatePostController : Controller
 
     private readonly ViewPostService _viewPostService;
 
-    public CreatePostController(CreatePostService createPostService, ViewPostService viewPostService)
+    private readonly IPostErrorMessages _postErrorMessages;
+
+    public CreatePostController(
+        CreatePostService createPostService,
+        ViewPostService viewPostService,
+        IPostErrorMessages postErrorMessages)
     {
         _createPostService = createPostService;
         _viewPostService = viewPostService;
+        _postErrorMessages = postErrorMessages;
     }
 
     [HttpGet]
@@ -48,13 +54,18 @@ public class CreatePostController : Controller
 
         var (errorCode, post) = await _createPostService.CreateAsync(userId, dto.Content, dto.ImageFile);
 
-        if (errorCode == Enums.PostErrorCode.ContentEmpty)
+        if (errorCode != Enums.PostErrorCode.None)
         {
-            ModelState.AddModelError(nameof(dto.Content), "内容を入力してください。");
-        }
-        else if (errorCode != Enums.PostErrorCode.None)
-        {
-            ModelState.AddModelError("", "投稿に失敗しました。");
+            var errorMessage = _postErrorMessages.GetErrorMessage(errorCode);
+
+            if (errorCode == Enums.PostErrorCode.ContentEmpty)
+            {
+                ModelState.AddModelError(nameof(dto.Content), errorMessage);
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, errorMessage);
+            }
         }
 
         if (!ModelState.IsValid)

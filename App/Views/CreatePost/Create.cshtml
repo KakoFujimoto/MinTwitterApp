@@ -30,24 +30,37 @@
     <ul class="list-group">
         @foreach (var post in Model.Posts)
         {
-            <li class="list-group-item">
-                <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
-                @post.Content
+            var postId = post.Id;
+            <li class="list-group-item" id="post-@postId">
+                <div id="display-@postId">
+                    <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
+                    <p>@post.Content</p>
 
-                @if (!string.IsNullOrEmpty(post.ImagePath))
-                {
-                    <a href="@post.ImagePath" target="_blank">
-                        <img src="@post.ImagePath" class="post-image">
-                    </a>
-                }
+                    @if (!string.IsNullOrEmpty(post.ImagePath))
+                    {
+                        <a href="@post.ImagePath" target="_blank">
+                            <img src="@post.ImagePath" class="post-image">
+                        </a>
+                    }
 
-                @if (User.Identity?.IsAuthenticated == true &&
-                        User.FindFirst("UserId")?.Value == post.UserId.ToString())
-                {
-                    <a href="/posts/@post.Id/edit" class="ms-2 text-secondary">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                }
+                    @if (User.Identity?.IsAuthenticated == true &&
+                                User.FindFirst("UserId")?.Value == post.UserId.ToString())
+                    {
+                        <button type="button" class="btn btn-link p-0 ms-2 text-secondary" onclick="toggleEdit(@post.Id)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    }
+                </div>
+
+                <!-- 編集フォーム（初期は非表示） -->
+                <div id="edit-@postId" style="display: none;">
+                    <form method="post" action="/posts/@postId/edit">
+                        <textarea name="Content" class="form-control mb-2">@post.Content</textarea>
+                        <button type="submit" class="btn btn-primary btn-sm">保存</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="deletePost(@postId)">削除</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit(@postId)">キャンセル</button>
+                    </form>
+                </div>
             </li>
         }
     </ul>
@@ -57,4 +70,29 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        function toggleEdit(postId) {
+            const display = document.getElementById(`display-${postId}`);
+            const edit = document.getElementById(`edit-${postId}`);
+            const isHidden = edit.style.display === 'none';
+
+            display.style.display = isHidden ? 'none' : 'block';
+            edit.style.display = isHidden ? 'block' : 'none';
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('本当に削除しますか？')) return;
+
+            const res = await fetch(`/api/DeletePost/${postId}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                document.getElementById(`post-${postId}`).remove();
+            } else {
+                alert('削除に失敗しました。');
+            }
+        }
+    </script>
 }

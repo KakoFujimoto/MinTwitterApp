@@ -2,7 +2,6 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
-using System.Threading.Tasks;
 
 namespace MinTwitterApp.Tests;
 
@@ -23,9 +22,10 @@ public class PostService_Tests : IDisposable
     [Fact]
     public async Task CreatePostAsync_Empty_ShoudReturnError()
     {
-        var postService = new PostService(db);
+        var postErrorService = new PostErrorService();
+        var createPostService = new CreatePostService(db, postErrorService);
 
-        var result = await postService.CreatePostAsync(1, "", null);
+        var result = await createPostService.CreateAsync(1, "", null);
 
         Assert.Equal(PostErrorCode.ContentEmpty, result.ErrorCode);
         Assert.Null(result.Post);
@@ -46,9 +46,10 @@ public class PostService_Tests : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var postService = new PostService(db);
+        var postErrorService = new PostErrorService();
+        var createPostService = new CreatePostService(db, postErrorService);
 
-        var result = await postService.CreatePostAsync(1, "テスト投稿", null);
+        var result = await createPostService.CreateAsync(1, "テスト投稿", null);
 
         Assert.Equal(PostErrorCode.None, result.ErrorCode);
         Assert.NotNull(result.Post);

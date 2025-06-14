@@ -23,9 +23,16 @@ public class User_Tests : IDisposable
     [Fact]
     public void CreateUser_Ok_Test()
     {
-        var user = User.Create("testuser", "test@example.com", "hashedpassword");
-        // これから
+        var name = "testuser";
+        var email = "test@example.com";
+        var passwordHash = "hashedPassword";
 
+        var user = User.Create(name, email, passwordHash);
+
+        Assert.Equal(name, user.Name);
+        Assert.Equal(email, user.Email);
+        Assert.Equal(passwordHash, user.PassWordHash);
+        Assert.True((DateTime.UtcNow - user.CreatedAt).TotalSeconds < 5);
     }
 
     [Fact]
@@ -50,7 +57,8 @@ public class User_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
-        var userService = new UserService(db, passwordService);
+        var userErrorService = new UserErrorService(db);
+        var userService = new UserService(db, passwordService, userErrorService);
         var authService = new AuthService(db, passwordService, userService);
 
         var rawPassword = "examplepassword";
@@ -74,7 +82,8 @@ public class User_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
-        var userService = new UserService(db, passwordService);
+        var userErrorService = new UserErrorService(db);
+        var userService = new UserService(db, passwordService, userErrorService);
         var authService = new AuthService(db, passwordService, userService);
 
         var rawPassword = "examplepassword";
@@ -97,7 +106,8 @@ public class User_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
-        var userService = new UserService(db, passwordService);
+        var userErrorService = new UserErrorService(db);
+        var userService = new UserService(db, passwordService, userErrorService);
         var authService = new AuthService(db, passwordService, userService);
 
         var rawPassword = "examplepassword";
@@ -119,7 +129,8 @@ public class User_Tests : IDisposable
     public async Task Register_NameEmpty_ReturnsNameEmptyError()
     {
         var passwordService = new PasswordService();
-        var userService = new UserService(db, passwordService);
+        var userErrorService = new UserErrorService(db);
+        var userService = new UserService(db, passwordService, userErrorService);
 
         var result = await userService.RegisterAsync("", "test@example.com", "validPassword");
 
@@ -130,7 +141,8 @@ public class User_Tests : IDisposable
     public async Task Register_EmailEmpty_ReturnsEmailEmptyError()
     {
         var passwordService = new PasswordService();
-        var userService = new UserService(db, passwordService);
+        var userErrorService = new UserErrorService(db);
+        var userService = new UserService(db, passwordService, userErrorService);
 
         var result = await userService.RegisterAsync("testuser", " ", "validPassword");
 

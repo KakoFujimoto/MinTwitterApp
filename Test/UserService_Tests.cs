@@ -26,7 +26,8 @@ public class UserService_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
-        var userService = new UserService(db, passwordService);
+        var userErrorService = new UserErrorService(db);
+        var userService = new UserService(db, passwordService, userErrorService);
 
         var errorCode = await userService.RegisterAsync("TestUser", "test@example.com", "password");
 
@@ -45,7 +46,8 @@ public class UserService_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var passwordService = new PasswordService();
-        var userService = new UserService(db, passwordService);
+        var userErrorService = new UserErrorService(db);
+        var userService = new UserService(db, passwordService, userErrorService);
 
         var existingUser = User.Create("A", "a@example.com", passwordService.Hash("pass123"));
         db.Users.Add(existingUser);

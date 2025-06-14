@@ -73,6 +73,8 @@ public class DeletePost_Tests : IDisposable
         Assert.Equal(PostErrorCode.None, errorCode);
         Assert.NotNull(postDto);
 
+        var deleteService = new DeletePostService(db);
+
         var firstResult = await deleteService.DeleteAsync(postDto!.Id);
         Assert.Equal(PostErrorCode.None, firstResult);
 

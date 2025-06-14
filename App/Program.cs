@@ -28,6 +28,7 @@ builder.Services.AddScoped<CreatePostService>();
 builder.Services.AddScoped<ViewPostService>();
 builder.Services.AddScoped<PostErrorService>();
 builder.Services.AddScoped<IPostErrorMessages, PostErrorMessages>();
+builder.Services.AddScoped<DeletePostService>();
 
 
 

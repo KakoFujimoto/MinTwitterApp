@@ -40,6 +40,14 @@
                         <img src="@post.ImagePath" class="post-image">
                     </a>
                 }
+
+                @if (User.Identity?.IsAuthenticated == true &&
+                        User.FindFirst("UserId")?.Value == post.UserId.ToString())
+                {
+                    <a href="/posts/@post.Id/edit" class="ms-2 text-secondary">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                }
             </li>
         }
     </ul>

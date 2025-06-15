@@ -7,10 +7,12 @@ namespace MinTwitterApp.Services;
 public class EditPostService
 {
     private readonly ApplicationDbContext _db;
+    private readonly PostErrorService _errorService;
 
-    public EditPostService(ApplicationDbContext db)
+    public EditPostService(ApplicationDbContext db, PostErrorService errorService)
     {
         _db = db;
+        _errorService = errorService;
     }
 
     public async Task<PostErrorCode> EditAsync(int postId, string newContent, IFormFile? newImageFile, bool deleteImage)
@@ -18,6 +20,13 @@ public class EditPostService
         var post = await _db.Posts.FirstOrDefaultAsync(p => p.Id == postId);
         if (post == null) return PostErrorCode.NotFound;
         if (post.IsDeleted) return PostErrorCode.AlreadyDeleted;
+
+        // 本文バリデーション
+        var contentError = _errorService.ValidateContent(newContent);
+        if (contentError != PostErrorCode.None)
+        {
+            return contentError;
+        }
 
         post.Content = newContent;
         post.UpdatedAt = DateTime.UtcNow;
@@ -40,12 +49,13 @@ public class EditPostService
                 if (File.Exists(oldPath)) File.Delete(oldPath);
             }
 
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(newImageFile.FileName)}";
-            var filePath = Path.Combine("wwwroot/uploads", fileName);
-            using var stream = new FileStream(filePath, FileMode.Create);
-            await newImageFile.CopyToAsync(stream);
+            var (imageError, savedPath) = await _errorService.ValidateAndSaveImageAsync(newImageFile);
+            if (imageError != PostErrorCode.None)
+            {
+                return imageError;
+            }
 
-            post.ImagePath = $"/uploads/{fileName}";
+            post.ImagePath = savedPath;
         }
 
         await _db.SaveChangesAsync();

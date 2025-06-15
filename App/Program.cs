@@ -29,6 +29,7 @@ builder.Services.AddScoped<ViewPostService>();
 builder.Services.AddScoped<PostErrorService>();
 builder.Services.AddScoped<IPostErrorMessages, PostErrorMessages>();
 builder.Services.AddScoped<DeletePostService>();
+builder.Services.AddScoped<EditPostService>();
 
 
 
@@ -67,5 +68,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapControllers();
 
 app.Run();

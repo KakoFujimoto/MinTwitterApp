@@ -25,14 +25,22 @@ public class EditPostController : ControllerBase
     [HttpPut("{postId}")]
     public async Task<IActionResult> Edit(int postId, [FromBody] EditPostRequest request)
     {
-        var result = await _editPostService.EditAsync(postId, request.Content);
-
-        if (result == PostErrorCode.None)
+        try
         {
-            return Ok(new { message = "投稿を編集しました" });
-        }
+            var result = await _editPostService.EditAsync(postId, request.Content);
 
-        var errorMessage = _errorMessages.GetErrorMessage(result);
-        return BadRequest(new { error = errorMessage });
+            if (result == PostErrorCode.None)
+            {
+                return Ok(new { message = "投稿を編集しました" });
+            }
+
+            var errorMessage = _errorMessages.GetErrorMessage(result);
+            return BadRequest(new { error = errorMessage });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
+
 }

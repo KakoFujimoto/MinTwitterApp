@@ -54,13 +54,14 @@
 
                 <!-- 編集フォーム（初期は非表示） -->
                 <div id="edit-@postId" style="display: none;">
-                    <form method="post" action="/posts/@postId/edit">
-                        <textarea name="Content" class="form-control mb-2">@post.Content</textarea>
+                    <form onsubmit="event.preventDefault(); saveEdit(@postId)">
+                        <textarea id="edit-content-@postId" class="form-control mb-2">@post.Content</textarea>
                         <button type="submit" class="btn btn-primary btn-sm">保存</button>
                         <button type="button" class="btn btn-danger btn-sm" onclick="deletePost(@postId)">削除</button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit(@postId)">キャンセル</button>
                     </form>
                 </div>
+
             </li>
         }
     </ul>
@@ -81,7 +82,36 @@
             edit.style.display = isHidden ? 'block' : 'none';
         }
 
+        async function saveEdit(postId) {
+            const content = document.getElementById(`edit-content-${postId}`).value;
+
+            const res = await fetch(`/api/EditPost/${postId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content })
+            });
+
+            let result;
+            try {
+                result = await res.json();
+            } catch (e) {
+                alert('サーバーエラーが発生しました。');
+                return;
+            }
+
+            if (res.ok) {
+                document.querySelector(`#display-${postId} p`).textContent = content;
+                toggleEdit(postId);
+            } else {
+                alert(result.error || '編集に失敗しました。');
+            }
+        }
+
+
         async function deletePost(postId) {
+            console.log("削除処理開始:", postId); // ← デバッグ用
             if (!confirm('本当に削除しますか？')) return;
 
             const res = await fetch(`/api/DeletePost/${postId}`, {
@@ -94,5 +124,6 @@
                 alert('削除に失敗しました。');
             }
         }
+
     </script>
 }

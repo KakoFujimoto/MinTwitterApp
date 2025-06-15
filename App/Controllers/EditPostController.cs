@@ -20,14 +20,21 @@ public class EditPostController : ControllerBase
     public class EditPostRequest
     {
         public string Content { get; set; } = string.Empty;
+        public IFormFile? ImageFile { get; set; }
+        public bool DeleteImage { get; set; }
     }
 
     [HttpPut("{postId}")]
-    public async Task<IActionResult> Edit(int postId, [FromBody] EditPostRequest request)
+    public async Task<IActionResult> Edit(int postId, [FromForm] EditPostRequest request)
     {
         try
         {
-            var result = await _editPostService.EditAsync(postId, request.Content);
+            var result = await _editPostService.EditAsync(
+                postId,
+                request.Content,
+                request.ImageFile,
+                request.DeleteImage
+            );
 
             if (result == PostErrorCode.None)
             {
@@ -42,5 +49,4 @@ public class EditPostController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
-
 }

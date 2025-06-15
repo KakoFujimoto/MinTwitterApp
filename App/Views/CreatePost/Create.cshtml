@@ -54,8 +54,13 @@
 
                 <!-- 編集フォーム（初期は非表示） -->
                 <div id="edit-@postId" style="display: none;">
-                    <form onsubmit="event.preventDefault(); saveEdit(@postId)">
+                    <form onsubmit="event.preventDefault(); saveEdit(@postId)" enctype="multipart/form-data">
                         <textarea id="edit-content-@postId" class="form-control mb-2">@post.Content</textarea>
+                        <input type="file" id="edit-image-@postId" class="form-control mb-2" />
+                        <div class="form-check mb-2">
+                            <input type="checkbox" class="form-check-input" id="delete-image-@postId">
+                            <label class="form-check-label" for="delete-image-@postId">画像を削除する</label>
+                        </div>
                         <button type="submit" class="btn btn-primary btn-sm">保存</button>
                         <button type="button" class="btn btn-danger btn-sm" onclick="deletePost(@postId)">削除</button>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="toggleEdit(@postId)">キャンセル</button>
@@ -84,13 +89,17 @@
 
         async function saveEdit(postId) {
             const content = document.getElementById(`edit-content-${postId}`).value;
+            const imageFile = document.getElementById(`edit-image-${postId}`).files[0];
+            const deleteImage = document.getElementById(`delete-image-${postId}`).checked;
+
+            const formData = new FormData();
+            formData.append("Content", content);
+            if (imageFile) formData.append("ImageFile", imageFile);
+            formData.append("DeleteImage", deleteImage);
 
             const res = await fetch(`/api/EditPost/${postId}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content })
+                body: formData
             });
 
             let result;
@@ -102,16 +111,13 @@
             }
 
             if (res.ok) {
-                document.querySelector(`#display-${postId} p`).textContent = content;
-                toggleEdit(postId);
+                location.reload();
             } else {
                 alert(result.error || '編集に失敗しました。');
             }
         }
 
-
         async function deletePost(postId) {
-            console.log("削除処理開始:", postId); // ← デバッグ用
             if (!confirm('本当に削除しますか？')) return;
 
             const res = await fetch(`/api/DeletePost/${postId}`, {

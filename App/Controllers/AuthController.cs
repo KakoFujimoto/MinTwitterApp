@@ -88,6 +88,7 @@ public class AuthController : Controller
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.Name),
             new(ClaimTypes.Email, user.Email),
+            // ClaimTypes.NameIdentifierと重複？
             new("UserId", user.Id.ToString())
         };
 

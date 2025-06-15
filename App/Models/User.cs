@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using MinTwitterApp.Common;
 
 namespace MinTwitterApp.Models;
 
@@ -24,14 +23,14 @@ public class User
     public ICollection<Post> Posts { get; set; } = new List<Post>();
     public ICollection<Like> Likes { get; set; } = new List<Like>();
 
-    public static User Create(string name, string email, string passwordHash)
+    public static User Create(IDateTimeAccessor dateTimeAccessor, string name, string email, string passwordHash)
     {
         return new User
         {
             Name = name,
             Email = email,
             PassWordHash = passwordHash,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = dateTimeAccessor.Now
         };
     }
 }

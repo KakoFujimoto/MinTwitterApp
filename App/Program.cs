@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MinTwitterApp.Data;
 using MinTwitterApp.Services;
+using MinTwitterApp.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+// builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PasswordService>();
@@ -30,6 +32,8 @@ builder.Services.AddScoped<PostErrorService>();
 builder.Services.AddScoped<IPostErrorMessages, PostErrorMessages>();
 builder.Services.AddScoped<DeletePostService>();
 builder.Services.AddScoped<EditPostService>();
+builder.Services.AddSingleton<IDateTimeAccessor, DateTimeAccessor>();
+
 
 
 

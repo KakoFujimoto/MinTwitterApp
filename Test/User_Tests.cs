@@ -27,13 +27,40 @@ public class User_Tests : IDisposable
         var email = "test@example.com";
         var passwordHash = "hashedPassword";
 
-        var user = User.Create(name, email, passwordHash);
+        // 中でDateTime.UtcNowを使わずに、IDateTimeAccessorを受け取って使うようにする
+        //  - 稼働時はDateTimeAccessorを利用する
+        //  - テスト中はDateTimeAccessorForUnitTestを利用する
+        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
+        var user = User.Create(dateTimeAccessor, name, email, passwordHash);
 
         Assert.Equal(name, user.Name);
         Assert.Equal(email, user.Email);
         Assert.Equal(passwordHash, user.PassWordHash);
-        Assert.True((DateTime.UtcNow - user.CreatedAt).TotalSeconds < 5);
+        // Assert.True((DateTime.UtcNow - user.CreatedAt).TotalSeconds < 5);
+        Assert.Equal(dateTimeAccessor.Now, user.CreatedAt);
     }
+
+    // アプリのコードに含める
+    class IDateTimeAccessor
+    {
+        public DateTime Now { get; }
+    }
+
+    // アプリのコードに含める
+    class DateTimeAccessor
+        : IDateTimeAccessor
+    {
+        public DateTime Now => DateTime.UtcNow;
+    }
+
+    // テストだけのコード
+    class DateTimeAccessorForUnitTest
+        : IDateTimeAccessor
+    {
+        public DateTime Now => new DateTime(2000, 2, 3, 4, 5, 6);
+    }
+
+
 
     [Fact]
     public void DuplicateEmail_Error_Test()

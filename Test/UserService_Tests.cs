@@ -58,5 +58,32 @@ public class UserService_Tests : IDisposable
         Assert.Equal(UserRegisterErrorCode.EmailAlreadyExists, errorCode);
 
         transaction.Rollback();
+
+        // XXX: インターフェースを使うとテスト用のダミークラスを用意できる
+        //      ※PostErrorMessagesクラスが未実装でもテストが書ける
+        IPostErrorMessages postErrorMessage = new PostErrorMessagesStub();
+
+        // XXX: Moqを使った場合
+        var postErrorMessageMock = new Mock<IPostErrorMessages>();
+        postErrorMessageMock.Setup(
+            x => x.GetErrorMessage(It<PostErrorCode>.Any())).Returns("未実装");
+        // postErrorMessageMock.Setup(
+        //     x => x.GetErrorMessage(PostErrorCode.AlreadyDeleted)).Returns("AlreadyDeleted");
+        var postErrorMessage = postErrorMessageMock.Object;
+
+        var controller = new Controllers.CreatePostController(
+            new CreatePostService(db, new PostErrorService()),
+            new ViewPostService(db),
+            postErrorMessage);
+    }
+
+    // XXX: インターフェースを使うとテスト用のダミークラスを用意できる
+    class PostErrorMessagesStub
+        : IPostErrorMessages
+    {
+        public string GetErrorMessage(PostErrorCode errorCode)
+        {
+            return "未実装";
+        }
     }
 }

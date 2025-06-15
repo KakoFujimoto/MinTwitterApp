@@ -22,5 +22,8 @@ public class ApplicationDbContext : DbContext
             .WithMany(u => u.Likes)
             .HasForeignKey(l => l.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Post>().HasQueryFilter(p => !p.IsDeleted);
+        // IgnoreQueryFilters
     }
 }

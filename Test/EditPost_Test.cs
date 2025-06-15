@@ -62,7 +62,7 @@ public class EditPost_Tests : IDisposable
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var user = User.Create("削除済ユーザー", "deleted@test.com", "hashedPassword");
+        var user = User.Create("ユーザー", "deleted@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 

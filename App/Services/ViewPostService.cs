@@ -13,10 +13,10 @@ public class ViewPostService
         _db = db;
     }
 
+    // 投稿取得処理にはグローバルクエリフィルターでIsDeletedを表示させていない
     public async Task<List<PostPageDTO>> GetAllPostsAsync()
     {
         return await _db.Posts
-            .Where(p => !p.IsDeleted)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new PostPageDTO
             {

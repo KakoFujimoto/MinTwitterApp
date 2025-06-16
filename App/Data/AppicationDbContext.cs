@@ -24,6 +24,6 @@ public class ApplicationDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Post>().HasQueryFilter(p => !p.IsDeleted);
-        // IgnoreQueryFilters
+        // IsDeletedを見たい場合は明示的にIgnoreQueryFiltersする必要がある
     }
 }

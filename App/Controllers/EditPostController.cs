@@ -28,9 +28,7 @@ public class EditPostController : ControllerBase
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Edit(int postId, [FromForm] EditPostRequest request)
     {
-        try
-        {
-            if (!ModelState.IsValid)
+        if (!ModelState.IsValid)
             {
                 return BadRequest(new { error = "入力内容に誤りがあります。" });
             }
@@ -50,11 +48,4 @@ public class EditPostController : ControllerBase
             var errorMessage = _errorMessages.GetErrorMessage(result);
             return BadRequest(new { error = errorMessage });
         }
-        catch (Exception ex)
-        {
-            // ログ出力
-            Console.WriteLine($"[EditPostController] Error: {ex}");
-            return StatusCode(500, new { error = "サーバーエラーが発生しました。" });
-        }
-    }
 }

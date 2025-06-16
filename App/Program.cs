@@ -6,7 +6,11 @@ using MinTwitterApp.Common;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<MinTwitterApp.Filters.GlobalExceptionFilter>();
+});
+
 
 builder.Services.AddSession(options =>
 {

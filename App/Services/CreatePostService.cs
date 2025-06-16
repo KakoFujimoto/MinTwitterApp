@@ -18,17 +18,22 @@ public class CreatePostService
 
     public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> CreateAsync(int userId, string content, IFormFile? imageFile)
     {
-
         var contentError = _postErrorService.ValidateContent(content);
         if (contentError != PostErrorCode.None)
         {
             return (contentError, null);
         }
 
-        var (imageError, savedImagePath) = await _postErrorService.ValidateAndSaveImageAsync(imageFile);
-        if (imageError != PostErrorCode.None)
+        var imageValidationError = _postErrorService.ValidateImage(imageFile);
+        if (imageValidationError != PostErrorCode.None)
         {
-            return (imageError, null);
+            return (imageValidationError, null);
+        }
+
+        string? savedImagePath = null;
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            savedImagePath = await _postErrorService.SaveImageAsync(imageFile);
         }
 
         var post = new Post
@@ -53,4 +58,5 @@ public class CreatePostService
 
         return (PostErrorCode.None, dto);
     }
+
 }

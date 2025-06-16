@@ -18,17 +18,18 @@ public class PostErrorService
         return PostErrorCode.None;
     }
 
-    public async Task<(PostErrorCode ErrorCode, string? SavedImagePath)> ValidateAndSaveImageAsync(IFormFile? imageFile)
+
+    public PostErrorCode ValidateImage(IFormFile? imageFile)
     {
         if (imageFile == null || imageFile.Length == 0)
         {
-            return (PostErrorCode.None, null);
+            return PostErrorCode.None;
         }
 
         var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
         if (!AllowedExtensions.Contains(ext))
         {
-            return (PostErrorCode.InvalidImageExtension, null);
+            return PostErrorCode.InvalidImageExtension;
         }
 
         try
@@ -38,32 +39,37 @@ public class PostErrorService
 
             if (format == null || (format.Name != "JPEG" && format.Name != "PNG" && format.Name != "GIF"))
             {
-                return (PostErrorCode.InvalidImageFormat, null);
+                return PostErrorCode.InvalidImageFormat;
             }
-
-            imageStream.Position = 0;
-
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = Guid.NewGuid().ToString() + ext;
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var output = new FileStream(filePath, FileMode.Create))
-            {
-                await imageStream.CopyToAsync(output);
-            }
-
-            var savedPath = "/uploads/" + uniqueFileName;
-            return (PostErrorCode.None, savedPath);
         }
         catch (UnknownImageFormatException)
         {
-            return (PostErrorCode.InvalidImageFormat, null);
+            return PostErrorCode.InvalidImageFormat;
         }
         catch
         {
-            return (PostErrorCode.ImageReadError, null);
+            return PostErrorCode.ImageReadError;
         }
+
+        return PostErrorCode.None;
     }
+
+    public async Task<string?> SaveImageAsync(IFormFile imageFile)
+    {
+        var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        Directory.CreateDirectory(uploadsFolder);
+
+        var uniqueFileName = Guid.NewGuid().ToString() + ext;
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        using (var imageStream = imageFile.OpenReadStream())
+        using (var output = new FileStream(filePath, FileMode.Create))
+        {
+            await imageStream.CopyToAsync(output);
+        }
+
+        return "/uploads/" + uniqueFileName;
+    }
+
 }

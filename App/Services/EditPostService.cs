@@ -27,7 +27,6 @@ public class EditPostService
             return PostErrorCode.AlreadyDeleted;
         }
 
-        // 本文バリデーション
         var contentError = _errorService.ValidateContent(newContent);
         if (contentError != PostErrorCode.None)
         {
@@ -37,30 +36,29 @@ public class EditPostService
         post.Content = newContent;
         post.UpdatedAt = DateTime.UtcNow;
 
-        // 画像削除処理
         if (deleteImage && !string.IsNullOrEmpty(post.ImagePath))
         {
             DeleteImageFile(post.ImagePath);
             post.ImagePath = null;
         }
 
-        // 画像差し替え処理
         if (newImageFile != null && newImageFile.Length > 0)
         {
-            // 古い画像を削除（削除済みでなければ）
-            if (!string.IsNullOrEmpty(post.ImagePath))
-            {
-                DeleteImageFile(post.ImagePath);
-            }
-
-            var (imageError, savedPath) = await _errorService.ValidateAndSaveImageAsync(newImageFile);
+            var imageError = _errorService.ValidateImage(newImageFile);
             if (imageError != PostErrorCode.None)
             {
                 return imageError;
             }
 
+            if (!string.IsNullOrEmpty(post.ImagePath))
+            {
+                DeleteImageFile(post.ImagePath);
+            }
+
+            var savedPath = await _errorService.SaveImageAsync(newImageFile);
             post.ImagePath = savedPath;
         }
+
 
         await _db.SaveChangesAsync();
         return PostErrorCode.None;

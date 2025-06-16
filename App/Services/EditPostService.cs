@@ -40,11 +40,7 @@ public class EditPostService
         // 画像削除処理
         if (deleteImage && !string.IsNullOrEmpty(post.ImagePath))
         {
-            var oldPath = Path.Combine("wwwroot", post.ImagePath.TrimStart('/'));
-            if (File.Exists(oldPath))
-            {
-                File.Delete(oldPath);
-            }
+            DeleteImageFile(post.ImagePath);
             post.ImagePath = null;
         }
 
@@ -54,11 +50,7 @@ public class EditPostService
             // 古い画像を削除（削除済みでなければ）
             if (!string.IsNullOrEmpty(post.ImagePath))
             {
-                var oldPath = Path.Combine("wwwroot", post.ImagePath.TrimStart('/'));
-                if (File.Exists(oldPath))
-                {
-                    File.Delete(oldPath);
-                }
+                DeleteImageFile(post.ImagePath);
             }
 
             var (imageError, savedPath) = await _errorService.ValidateAndSaveImageAsync(newImageFile);
@@ -72,5 +64,19 @@ public class EditPostService
 
         await _db.SaveChangesAsync();
         return PostErrorCode.None;
+    }
+
+    private void DeleteImageFile(string? imagePath)
+    {
+        if (string.IsNullOrEmpty(imagePath))
+        {
+            return;
+        }
+
+        var fullPath = Path.Combine("wwwroot", imagePath.TrimStart('/'));
+        if (File.Exists(fullPath))
+        {
+            File.Delete(fullPath);
+        }
     }
 }

@@ -3,6 +3,7 @@ using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
+using MinTwitterApp.Common;
 
 namespace MinTwitterApp.Tests;
 
@@ -20,12 +21,20 @@ public class DeletePost_Tests : IDisposable
         db.Dispose();
     }
 
+    class DateTimeAccessorForUnitTest
+        : IDateTimeAccessor
+    {
+        public DateTime Now => new DateTime(2000, 2, 3, 4, 5, 6);
+    }
+
     [Fact]
     public async Task DeletePost_Success_Test()
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var user = User.Create("削除ユーザー", "delete@test.com", "hashedPassword");
+        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
+
+        var user = User.Create(dateTimeAccessor,"削除ユーザー", "delete@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 
@@ -62,7 +71,8 @@ public class DeletePost_Tests : IDisposable
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var user = User.Create("既に削除済", "delete@test.com", "hashedPassword");
+        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
+        var user = User.Create(dateTimeAccessor,"既に削除済", "delete@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 

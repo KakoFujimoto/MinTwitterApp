@@ -44,7 +44,7 @@
                     }
 
                     @if (User.Identity?.IsAuthenticated == true &&
-                                User.FindFirst("UserId")?.Value == post.UserId.ToString())
+                                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == post.UserId.ToString())
                     {
                         <button type="button" class="btn btn-link p-0 ms-2 text-secondary" onclick="toggleEdit(@post.Id)">
                             <i class="fas fa-edit"></i>

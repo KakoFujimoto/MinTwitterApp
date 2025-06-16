@@ -37,8 +37,7 @@ builder.Services.AddScoped<IPostErrorMessages, PostErrorMessages>();
 builder.Services.AddScoped<DeletePostService>();
 builder.Services.AddScoped<EditPostService>();
 builder.Services.AddSingleton<IDateTimeAccessor, DateTimeAccessor>();
-
-
+builder.Services.AddScoped<LikePostService>();
 
 
 builder.Services.AddAuthentication("MyCookieAuth")

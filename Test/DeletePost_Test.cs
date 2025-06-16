@@ -4,6 +4,7 @@ using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace MinTwitterApp.Tests;
 
@@ -34,7 +35,7 @@ public class DeletePost_Tests : IDisposable
 
         var dateTimeAccessor = new DateTimeAccessorForUnitTest();
 
-        var user = User.Create(dateTimeAccessor,"削除ユーザー", "delete@test.com", "hashedPassword");
+        var user = User.Create(dateTimeAccessor, "削除ユーザー", "delete@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 
@@ -50,7 +51,7 @@ public class DeletePost_Tests : IDisposable
 
         Assert.Equal(PostErrorCode.None, result);
 
-        var deletePost = db.Posts.First(p => p.Id == postDto.Id);
+        var deletePost = db.Posts.IgnoreQueryFilters().First(p => p.Id == postDto.Id);
         Assert.True(deletePost.IsDeleted);
 
         transaction.Rollback();
@@ -72,7 +73,7 @@ public class DeletePost_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var dateTimeAccessor = new DateTimeAccessorForUnitTest();
-        var user = User.Create(dateTimeAccessor,"既に削除済", "delete@test.com", "hashedPassword");
+        var user = User.Create(dateTimeAccessor, "既に削除済", "delete@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 
@@ -89,7 +90,7 @@ public class DeletePost_Tests : IDisposable
         Assert.Equal(PostErrorCode.None, firstResult);
 
         var secondResult = await deleteService.DeleteAsync(postDto.Id);
-        Assert.Equal(PostErrorCode.AlreadyDeleted, secondResult);
+        Assert.Equal(PostErrorCode.NotFound, secondResult);
 
         transaction.Rollback();
     }

@@ -49,11 +49,11 @@ public class PostService_Tests : IDisposable
         var postErrorService = new PostErrorService();
         var createPostService = new CreatePostService(db, postErrorService);
 
-        var result = await createPostService.CreateAsync(1, "テスト投稿", null);
+        var result = await createPostService.CreateAsync(user.Id, "テスト投稿", null);
 
         Assert.Equal(PostErrorCode.None, result.ErrorCode);
         Assert.NotNull(result.Post);
-        Assert.Equal(1, result.Post!.UserId);
+        Assert.Equal(user.Id, result.Post!.UserId);
         Assert.Equal("テスト投稿", result.Post.Content);
 
         transaction.Rollback();

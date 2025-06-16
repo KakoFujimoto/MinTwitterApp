@@ -27,7 +27,7 @@ public class EditPost_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var dateTimeAccessor = new DateTimeAccessorForUnitTest();
-        var user = User.Create(dateTimeAccessor,"編集ユーザー", "edit@test.com", "hashedPassword");
+        var user = User.Create(dateTimeAccessor, "編集ユーザー", "edit@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 
@@ -40,7 +40,7 @@ public class EditPost_Tests : IDisposable
         var errorService = new PostErrorService();
         var editPostService = new EditPostService(db, errorService);
 
-        var result = await editPostService.EditAsync(postDto!.Id, "編集後の内容",null,false);
+        var result = await editPostService.EditAsync(postDto!.Id, "編集後の内容", null, false);
 
         Assert.Equal(PostErrorCode.None, result);
 
@@ -54,9 +54,9 @@ public class EditPost_Tests : IDisposable
     public async Task EditPost_NotFound_Test()
     {
         var errorService = new PostErrorService();
-        var editPostService = new EditPostService(db,errorService);
+        var editPostService = new EditPostService(db, errorService);
 
-        var result = await editPostService.EditAsync(-999, "存在しない投稿の編集",null,false);
+        var result = await editPostService.EditAsync(-999, "存在しない投稿の編集", null, false);
 
         Assert.Equal(PostErrorCode.NotFound, result);
     }
@@ -67,7 +67,7 @@ public class EditPost_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var dateTimeAccessor = new DateTimeAccessorForUnitTest();
-        var user = User.Create(dateTimeAccessor,"ユーザー", "deleted@test.com", "hashedPassword");
+        var user = User.Create(dateTimeAccessor, "ユーザー", "deleted@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 
@@ -82,10 +82,9 @@ public class EditPost_Tests : IDisposable
 
         var errorService = new PostErrorService();
         var editPostService = new EditPostService(db, errorService);
-        var result = await editPostService.EditAsync(postDto.Id, "編集しようとした内容",null,false);
+        var result = await editPostService.EditAsync(postDto.Id, "編集しようとした内容", null, false);
 
-        // 実装を変えたのでエラーにする必要がない
-        Assert.Equal(PostErrorCode.AlreadyDeleted, result);
+        Assert.Equal(PostErrorCode.NotFound, result);
 
         transaction.Rollback();
     }

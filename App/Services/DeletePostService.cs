@@ -20,12 +20,7 @@ public class DeletePostService
         {
             return PostErrorCode.NotFound;
         }
-
-        if (post.IsDeleted)
-        {
-            return PostErrorCode.AlreadyDeleted;
-        }
-
+        
         post.IsDeleted = true;
         await _db.SaveChangesAsync();
 

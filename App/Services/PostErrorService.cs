@@ -7,49 +7,32 @@ namespace MinTwitterApp.Services;
 public class PostErrorService
 {
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+    private readonly ImageFormatDetector _detector;
+
+    public PostErrorService(ImageFormatDetector detector)
+    {
+        _detector = detector;
+    }
 
     public PostErrorCode ValidateContent(string? content)
     {
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            return PostErrorCode.ContentEmpty;
-        }
-
-        return PostErrorCode.None;
+        return string.IsNullOrWhiteSpace(content)
+            ? PostErrorCode.ContentEmpty
+            : PostErrorCode.None;
     }
-
 
     public PostErrorCode ValidateImage(IFormFile? imageFile)
     {
         if (imageFile == null || imageFile.Length == 0)
-        {
             return PostErrorCode.None;
-        }
 
         var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
         if (!AllowedExtensions.Contains(ext))
-        {
             return PostErrorCode.InvalidImageExtension;
-        }
 
-        try
-        {
-            using var imageStream = imageFile.OpenReadStream();
-            IImageFormat? format = Image.DetectFormat(imageStream);
-
-            if (format == null || (format.Name != "JPEG" && format.Name != "PNG" && format.Name != "GIF"))
-            {
-                return PostErrorCode.InvalidImageFormat;
-            }
-        }
-        catch (UnknownImageFormatException)
-        {
+        var format = _detector.DetectFormat(imageFile);
+        if (!_detector.IsSupportedFormat(format))
             return PostErrorCode.InvalidImageFormat;
-        }
-        catch
-        {
-            return PostErrorCode.ImageReadError;
-        }
 
         return PostErrorCode.None;
     }
@@ -63,13 +46,10 @@ public class PostErrorService
         var uniqueFileName = Guid.NewGuid().ToString() + ext;
         var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-        using (var imageStream = imageFile.OpenReadStream())
-        using (var output = new FileStream(filePath, FileMode.Create))
-        {
-            await imageStream.CopyToAsync(output);
-        }
+        using var imageStream = imageFile.OpenReadStream();
+        using var output = new FileStream(filePath, FileMode.Create);
+        await imageStream.CopyToAsync(output);
 
         return "/uploads/" + uniqueFileName;
     }
-
 }

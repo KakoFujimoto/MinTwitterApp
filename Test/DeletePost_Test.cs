@@ -22,6 +22,7 @@ public class DeletePost_Tests : IDisposable
         db.Dispose();
     }
 
+    // Commonと重複
     class DateTimeAccessorForUnitTest
         : IDateTimeAccessor
     {

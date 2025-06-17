@@ -1,4 +1,6 @@
+@using MinTwitterApp.Common
 @model MinTwitterApp.DTO.CreatePostDTO
+@inject LoginUser loginUser
 
 @{
     ViewData["Title"] = "新規投稿";
@@ -23,7 +25,8 @@
 
 <hr>
 
-<h3>Posts</h3>
+<h3>using MinTwitterApp.Common;
+#line default
 
 @if (Model.Posts != null && Model.Posts.Any())
 {
@@ -44,7 +47,7 @@
                     }
 
                     @if (User.Identity?.IsAuthenticated == true &&
-                                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == post.UserId.ToString())
+                                loginUser.GetUserId() == post.UserId.ToString())
                     {
                         <button type="button" class="btn btn-link p-0 ms-2 text-secondary" onclick="toggleEdit(@post.Id)">
                             <i class="fas fa-edit"></i>

@@ -38,6 +38,7 @@ builder.Services.AddScoped<DeletePostService>();
 builder.Services.AddScoped<EditPostService>();
 builder.Services.AddSingleton<IDateTimeAccessor, DateTimeAccessor>();
 builder.Services.AddScoped<LikePostService>();
+builder.Services.AddScoped<LoginUser>();
 
 
 builder.Services.AddAuthentication("MyCookieAuth")

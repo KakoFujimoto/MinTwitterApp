@@ -114,7 +114,7 @@ public class AuthController : Controller
         _sessionService.Clear();
 
         TempData["Message"] = "ログアウトしました。";
-        return RedirectToAction("Login", "Auth");
+        return RedirectToAction("Index", "Home");
     }
 
 }

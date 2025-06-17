@@ -8,7 +8,7 @@ public class PostErrorService
 {
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
 
-    public PostErrorCode ValidateContent(string content)
+    public PostErrorCode ValidateContent(string? content)
     {
         if (string.IsNullOrWhiteSpace(content))
         {

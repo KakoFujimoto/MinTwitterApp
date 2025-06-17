@@ -15,7 +15,7 @@ public class EditPostService
         _errorService = errorService;
     }
 
-    public async Task<PostErrorCode> EditAsync(int postId, string newContent, IFormFile? newImageFile, bool deleteImage)
+    public async Task<PostErrorCode> EditAsync(int postId, string? newContent, IFormFile? newImageFile, bool deleteImage)
     {
         var post = await _db.Posts.FirstOrDefaultAsync(p => p.Id == postId);
         if (post == null)
@@ -33,7 +33,7 @@ public class EditPostService
             return contentError;
         }
 
-        post.Content = newContent;
+        post.Content = newContent!;
         post.UpdatedAt = DateTime.UtcNow;
 
         if (deleteImage && !string.IsNullOrEmpty(post.ImagePath))

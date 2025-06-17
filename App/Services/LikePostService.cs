@@ -1,28 +1,41 @@
 using Microsoft.EntityFrameworkCore;
 using MinTwitterApp.Data;
 using MinTwitterApp.DTO;
+using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 
 namespace MinTwitterApp.Services;
 
 public class LikePostService
 {
-    private readonly ApplicationDbContext db;
+    private readonly ApplicationDbContext _db;
 
-    public LikePostService(ApplicationDbContext db)
+    private readonly PostErrorService _postErrorService;
+
+    public LikePostService(ApplicationDbContext db, PostErrorService postErrorService)
     {
-        this.db = db;
+        _db = db;
+        _postErrorService = postErrorService;
     }
 
     public async Task<LikeResultDTO> ToggleLikeAsync(int userId, int postId)
     {
-        var existingLike = await db.Likes
+        var post = await _db.Posts.FindAsync(postId);
+        if (post == null)
+        {
+            return new LikeResultDTO
+            {
+                IsLiked = false,
+                ErrorCode = PostErrorCode.NotFound
+            };
+        }
+        var existingLike = await _db.Likes
             .FirstOrDefaultAsync(l => l.UserId == userId && l.PostId == postId);
 
         if (existingLike != null)
         {
-            db.Likes.Remove(existingLike);
-            await db.SaveChangesAsync();
+            _db.Likes.Remove(existingLike);
+            await _db.SaveChangesAsync();
             return new LikeResultDTO { IsLiked = false };
         }
         else
@@ -33,8 +46,8 @@ public class LikePostService
                 PostId = postId,
                 CreatedAt = DateTime.Now
             };
-            db.Likes.Add(like);
-            await db.SaveChangesAsync();
+            _db.Likes.Add(like);
+            await _db.SaveChangesAsync();
             return new LikeResultDTO { IsLiked = true };
         }
     }

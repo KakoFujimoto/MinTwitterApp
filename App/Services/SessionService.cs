@@ -14,7 +14,7 @@ public class SessionService : ISessionService
     }
     public int? GetUserId()
     {
-        return _httpContextAccessor.?.Session.GetInt32("UserId");
+        return _httpContextAccessor.HttpContext?.Session.GetInt32("UserId");
     }
 
     public void Clear()

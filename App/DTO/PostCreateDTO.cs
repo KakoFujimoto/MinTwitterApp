@@ -12,5 +12,7 @@ public class CreatePostDTO
 
     public IFormFile? ImageFile { get; set; }
 
+    public int CurrentUserId { get; set; }
+
     public List<PostPageDTO> Posts { get; set; } = new();
 }

@@ -28,13 +28,22 @@ public class CreatePostController : Controller
     public async Task<IActionResult> Index()
     {
         var posts = await _viewPostService.GetAllPostsAsync();
+
+        var inputUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(inputUserId, out int userId))
+        {
+            return Unauthorized();
+        }
+
         var dto = new CreatePostDTO
         {
-            Posts = posts
+            Posts = posts,
+            CurrentUserId = userId
         };
 
         return View("Create", dto);
     }
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]

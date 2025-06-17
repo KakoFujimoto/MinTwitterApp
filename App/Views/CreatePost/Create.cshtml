@@ -35,7 +35,7 @@
                 <div id="display-@postId">
                     <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
                     <p>@post.Content</p>
-
+                    <div id="like-button-root-@postId" data-user-id="@Model.CurrentUserId" data-post-id="@postId"></div>
                     @if (!string.IsNullOrEmpty(post.ImagePath))
                     {
                         <a href="@post.ImagePath" target="_blank">
@@ -132,4 +132,6 @@
         }
 
     </script>
+    <script src="~/react/static/js/main.e6398ce4.js"></script>
+
 }

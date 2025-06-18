@@ -17,6 +17,7 @@ public class ViewPostService
     public async Task<List<PostPageDTO>> GetAllPostsAsync()
     {
         return await _db.Posts
+        .Include(p => p.User)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => new PostPageDTO
             {
@@ -24,7 +25,8 @@ public class ViewPostService
                 Content = p.Content,
                 ImagePath = p.ImagePath,
                 CreatedAt = p.CreatedAt,
-                UserId = p.UserId
+                UserId = p.UserId,
+                UserName = p.User.Name
             })
             .ToListAsync();
     }

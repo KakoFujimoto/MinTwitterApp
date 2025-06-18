@@ -2,6 +2,7 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace MinTwitterApp.Services;
 
@@ -47,16 +48,25 @@ public class CreatePostService
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();
 
+        var savedPost = await _db.Posts
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == post.Id);
+
+        if (savedPost == null)
+        {
+            return (PostErrorCode.NotFound, null);
+        }
+
         var dto = new PostPageDTO
         {
-            Id = post.Id,
-            Content = post.Content,
-            ImagePath = post.ImagePath,
-            UserId = post.UserId,
-            CreatedAt = post.CreatedAt
+            Id = savedPost.Id,
+            Content = savedPost.Content,
+            ImagePath = savedPost.ImagePath,
+            UserId = savedPost.UserId,
+            UserName = savedPost.User.Name,
+            CreatedAt = savedPost.CreatedAt
         };
 
         return (PostErrorCode.None, dto);
     }
-
 }

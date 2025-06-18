@@ -10,8 +10,7 @@
 
     @if (User.Identity?.IsAuthenticated == true)
     {
-        <form asp-controller="Auth" asp-action="Logout" method="post">
-            <button type="submit" class="btn btn-primary">ログアウト</button>
-        </form>
+        <a href="http://localhost:5054/CreatePost" class="btn btn-link">投稿一覧へ</a>
     }
+
 </div>

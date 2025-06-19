@@ -2,6 +2,7 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
+using MinTwitterApp.Tests.Common;
 
 namespace MinTwitterApp.Tests;
 
@@ -22,7 +23,8 @@ public class PostService_Tests : IDisposable
     [Fact]
     public async Task CreatePostAsync_Empty_ShoudReturnError()
     {
-        var postErrorService = new PostErrorService();
+        var imageDetector = new FakeImageFormatDetector();
+        var postErrorService = new PostErrorService(imageDetector);
         var createPostService = new CreatePostService(db, postErrorService);
 
         var result = await createPostService.CreateAsync(1, "", null);
@@ -46,7 +48,8 @@ public class PostService_Tests : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var postErrorService = new PostErrorService();
+        var imageDetector = new FakeImageFormatDetector();
+        var postErrorService = new PostErrorService(imageDetector);
         var createPostService = new CreatePostService(db, postErrorService);
 
         var result = await createPostService.CreateAsync(user.Id, "テスト投稿", null);
@@ -58,5 +61,4 @@ public class PostService_Tests : IDisposable
 
         transaction.Rollback();
     }
-
 }

@@ -2,8 +2,8 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
-using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
+using MinTwitterApp.Tests.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace MinTwitterApp.Tests;
@@ -22,9 +22,7 @@ public class DeletePost_Tests : IDisposable
         db.Dispose();
     }
 
-    // Commonと重複
-    class DateTimeAccessorForUnitTest
-        : IDateTimeAccessor
+    class DateTimeAccessorForUnitTest : IDateTimeAccessor
     {
         public DateTime Now => new DateTime(2000, 2, 3, 4, 5, 6);
     }
@@ -35,19 +33,20 @@ public class DeletePost_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var dateTimeAccessor = new DateTimeAccessorForUnitTest();
+        var imageDetector = new FakeImageFormatDetector();
+        var postErrorService = new PostErrorService(imageDetector);
 
         var user = User.Create(dateTimeAccessor, "削除ユーザー", "delete@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 
-        var createPostService = new CreatePostService(db, new PostErrorService());
-        (PostErrorCode errorCode, PostPageDTO? postDto) = await createPostService.CreateAsync(user.Id, "削除対象", null);
+        var createPostService = new CreatePostService(db, postErrorService);
+        var (errorCode, postDto) = await createPostService.CreateAsync(user.Id, "削除対象", null);
 
         Assert.Equal(PostErrorCode.None, errorCode);
         Assert.NotNull(postDto);
 
         var deleteService = new DeletePostService(db);
-
         var result = await deleteService.DeleteAsync(postDto!.Id);
 
         Assert.Equal(PostErrorCode.None, result);
@@ -62,9 +61,7 @@ public class DeletePost_Tests : IDisposable
     public async Task DeletePost_NotFound_Test()
     {
         var deleteService = new DeletePostService(db);
-
         var result = await deleteService.DeleteAsync(-999);
-
         Assert.Equal(PostErrorCode.NotFound, result);
     }
 
@@ -74,13 +71,15 @@ public class DeletePost_Tests : IDisposable
         using var transaction = db.Database.BeginTransaction();
 
         var dateTimeAccessor = new DateTimeAccessorForUnitTest();
+        var imageDetector = new FakeImageFormatDetector();
+        var postErrorService = new PostErrorService(imageDetector);
+
         var user = User.Create(dateTimeAccessor, "既に削除済", "delete@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 
-        var createPostService = new CreatePostService(db, new PostErrorService());
-        (PostErrorCode errorCode, PostPageDTO? postDto) = await createPostService.CreateAsync(
-            user.Id, "既に削除された投稿", null);
+        var createPostService = new CreatePostService(db, postErrorService);
+        var (errorCode, postDto) = await createPostService.CreateAsync(user.Id, "既に削除された投稿", null);
 
         Assert.Equal(PostErrorCode.None, errorCode);
         Assert.NotNull(postDto);

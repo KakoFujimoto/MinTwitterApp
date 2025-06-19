@@ -21,4 +21,11 @@ public class LikeController : ControllerBase
         var result = await likePostService.ToggleLikeAsync(request.UserId, request.PostId);
         return Ok(result);
     }
+
+    [HttpGet("count/{postId}")]
+    public ActionResult<int> GetLikeCount(int postId)
+    {
+        var count = likePostService.GetLikeCount(postId);
+        return Ok(count);
+    }
 }

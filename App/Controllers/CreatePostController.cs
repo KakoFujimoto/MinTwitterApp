@@ -32,7 +32,8 @@ public class CreatePostController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var posts = await _viewPostService.GetAllPostsAsync();
+        var currentUserId = int.Parse(_loginUser.GetUserId());
+        var posts = await _viewPostService.GetAllPostsAsync(currentUserId);
 
         var inputUserId = _loginUser.GetUserId();
         if (!int.TryParse(inputUserId, out int userId))
@@ -56,7 +57,8 @@ public class CreatePostController : Controller
     {
         if (!ModelState.IsValid)
         {
-            dto.Posts = await _viewPostService.GetAllPostsAsync();
+            var currentUserId = int.Parse(_loginUser.GetUserId());
+            dto.Posts = await _viewPostService.GetAllPostsAsync(currentUserId);
             return View("Create", dto);
         }
 
@@ -84,7 +86,8 @@ public class CreatePostController : Controller
 
         if (!ModelState.IsValid)
         {
-            dto.Posts = await _viewPostService.GetAllPostsAsync();
+            var currentUserId = int.Parse(_loginUser.GetUserId());
+            dto.Posts = await _viewPostService.GetAllPostsAsync(currentUserId);
             return View("Create", dto);
         }
 

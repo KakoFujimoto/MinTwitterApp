@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using Microsoft.AspNetCore.Authorization;
+using MinTwitterApp.Common;
 
 namespace MinTwitterApp.Controllers;
 
@@ -8,17 +9,20 @@ namespace MinTwitterApp.Controllers;
 public class ViewPostController : Controller
 {
     private readonly ViewPostService _viewPostService;
+    private readonly LoginUser _loginuser;
 
-    public ViewPostController(ViewPostService viewPostService)
+    public ViewPostController(ViewPostService viewPostService, LoginUser loginUser)
     {
         _viewPostService = viewPostService;
+        _loginuser = loginUser;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var posts = await _viewPostService.GetAllPostsAsync();
-        return View("Index", posts); // Views/ViewPost/Index.cshtml を想定
+        var currentUserId = int.Parse(_loginuser.GetUserId());
+        var posts = await _viewPostService.GetAllPostsAsync(currentUserId);
+        return View("Index", posts);
     }
 
     [HttpGet("ViewPost/User/{userId}")]

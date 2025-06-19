@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using MinTwitterApp.Data;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Enums;
@@ -26,6 +27,7 @@ public class LikePostService
             return new LikeResultDTO
             {
                 IsLiked = false,
+                LikeCount = 0,
                 ErrorCode = PostErrorCode.NotFound
             };
         }
@@ -36,7 +38,13 @@ public class LikePostService
         {
             _db.Likes.Remove(existingLike);
             await _db.SaveChangesAsync();
-            return new LikeResultDTO { IsLiked = false };
+
+            return new LikeResultDTO
+            {
+                IsLiked = false,
+                LikeCount = _db.Likes.Count(l => l.PostId == postId),
+                ErrorCode = PostErrorCode.None
+            };
         }
         else
         {
@@ -48,7 +56,17 @@ public class LikePostService
             };
             _db.Likes.Add(like);
             await _db.SaveChangesAsync();
-            return new LikeResultDTO { IsLiked = true };
+            return new LikeResultDTO
+            {
+                IsLiked = true,
+                LikeCount = _db.Likes.Count(l => l.PostId == postId),
+                ErrorCode = PostErrorCode.None
+            };
         }
+    }
+
+    public int GetLikeCount(int postId)
+    {
+        return _db.Likes.Count(l => l.PostId == postId);
     }
 }

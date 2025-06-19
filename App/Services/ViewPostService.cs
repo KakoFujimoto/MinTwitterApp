@@ -14,36 +14,48 @@ public class ViewPostService
     }
 
     // 投稿取得処理にはグローバルクエリフィルターでIsDeletedを表示させていない
-    public async Task<List<PostPageDTO>> GetAllPostsAsync()
+    public async Task<List<PostPageDTO>> GetAllPostsAsync(int currentUserId)
     {
-        return await _db.Posts
-        .Include(p => p.User)
+        var posts = await _db.Posts
+            .Include(p => p.User)
             .OrderByDescending(p => p.CreatedAt)
-            .Select(p => new PostPageDTO
-            {
-                Id = p.Id,
-                Content = p.Content,
-                ImagePath = p.ImagePath,
-                CreatedAt = p.CreatedAt,
-                UserId = p.UserId,
-                UserName = p.User.Name
-            })
             .ToListAsync();
+
+        var dtos = posts.Select(p => new PostPageDTO
+        {
+            Id = p.Id,
+            Content = p.Content,
+            ImagePath = p.ImagePath,
+            CreatedAt = p.CreatedAt,
+            UserId = p.UserId,
+            UserName = p.User.Name,
+            LikeCount = _db.Likes.Count(l => l.PostId == p.Id),
+            IsLiked = _db.Likes.Any(l => l.PostId == p.Id && l.UserId == currentUserId)
+        }).ToList();
+
+        return dtos;
     }
+
 
     public async Task<List<PostPageDTO>> GetPostsByUserIdAsync(int userId)
     {
-        return await _db.Posts
+        var posts = await _db.Posts
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.CreatedAt)
-            .Select(p => new PostPageDTO
-            {
-                Id = p.Id,
-                Content = p.Content,
-                ImagePath = p.ImagePath,
-                CreatedAt = p.CreatedAt,
-                UserId = p.UserId
-            })
             .ToListAsync();
+
+        var dtos = posts.Select(p => new PostPageDTO
+        {
+            Id = p.Id,
+            Content = p.Content,
+            ImagePath = p.ImagePath,
+            CreatedAt = p.CreatedAt,
+            UserId = p.UserId,
+            UserName = p.User?.Name,
+            LikeCount = _db.Likes.Count(l => l.PostId == p.Id)
+        }).ToList();
+
+        return dtos;
     }
+
 }

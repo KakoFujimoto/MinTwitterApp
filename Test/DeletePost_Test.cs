@@ -2,7 +2,6 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
-using MinTwitterApp.Common;
 using MinTwitterApp.Tests.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,9 +11,12 @@ public class DeletePost_Tests : IDisposable
 {
     private readonly ApplicationDbContext db;
 
+    private readonly DateTimeAccessorForUnitTest dateTimeAccessorForUnitTest;
+
     public DeletePost_Tests()
     {
         db = TestDbHelper.CreateDbContext();
+        dateTimeAccessorForUnitTest = new DateTimeAccessorForUnitTest();
     }
 
     public void Dispose()
@@ -22,21 +24,16 @@ public class DeletePost_Tests : IDisposable
         db.Dispose();
     }
 
-    class DateTimeAccessorForUnitTest : IDateTimeAccessor
-    {
-        public DateTime Now => new DateTime(2000, 2, 3, 4, 5, 6);
-    }
 
     [Fact]
     public async Task DeletePost_Success_Test()
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
 
-        var user = User.Create(dateTimeAccessor, "削除ユーザー", "delete@test.com", "hashedPassword");
+        var user = User.Create(dateTimeAccessorForUnitTest, "削除ユーザー", "delete@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 
@@ -70,11 +67,10 @@ public class DeletePost_Tests : IDisposable
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
 
-        var user = User.Create(dateTimeAccessor, "既に削除済", "delete@test.com", "hashedPassword");
+        var user = User.Create(dateTimeAccessorForUnitTest, "既に削除済", "delete@test.com", "hashedPassword");
         db.Users.Add(user);
         db.SaveChanges();
 

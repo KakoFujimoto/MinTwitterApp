@@ -2,7 +2,6 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
-using MinTwitterApp.Common;
 using MinTwitterApp.Tests.Common;
 
 namespace MinTwitterApp.Tests;
@@ -10,10 +9,12 @@ namespace MinTwitterApp.Tests;
 public class LikeCount_Tests : IDisposable
 {
     private readonly ApplicationDbContext db;
+    private readonly DateTimeAccessorForUnitTest dateTimeAccessorForUnitTest;
 
     public LikeCount_Tests()
     {
         db = TestDbHelper.CreateDbContext();
+        dateTimeAccessorForUnitTest = new DateTimeAccessorForUnitTest();
     }
 
     public void Dispose()
@@ -21,22 +22,16 @@ public class LikeCount_Tests : IDisposable
         db.Dispose();
     }
 
-    class DateTimeAccessorForUnitTest : IDateTimeAccessor
-    {
-        public DateTime Now => new DateTime(2000, 2, 3, 4, 5, 6);
-    }
-
     [Fact]
     public async Task GetLikeCount_ShouldReturnCorrectCount()
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
 
-        var user1 = User.Create(dateTimeAccessor, "ユーザー1", "user1@test.com", "hashedPassword");
-        var user2 = User.Create(dateTimeAccessor, "ユーザー2", "user2@test.com", "hashedPassword");
+        var user1 = User.Create(dateTimeAccessorForUnitTest, "ユーザー1", "user1@test.com", "hashedPassword");
+        var user2 = User.Create(dateTimeAccessorForUnitTest, "ユーザー2", "user2@test.com", "hashedPassword");
         db.Users.AddRange(user1, user2);
         db.SaveChanges();
 

@@ -1,6 +1,8 @@
 using MinTwitterApp.Enums;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Gif;
 
 namespace MinTwitterApp.Services;
 
@@ -26,15 +28,23 @@ public class PostErrorService
         if (imageFile == null || imageFile.Length == 0)
             return PostErrorCode.None;
 
+        
         var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
         if (!AllowedExtensions.Contains(ext))
+        {
             return PostErrorCode.InvalidImageExtension;
+    }
 
         var format = _detector.DetectFormat(imageFile);
-        if (!_detector.IsSupportedFormat(format))
+        if (!IsSupportedFormat(format))
             return PostErrorCode.InvalidImageFormat;
 
         return PostErrorCode.None;
+    }
+
+   public bool IsSupportedFormat(IImageFormat? format)
+    {
+        return format is JpegFormat or PngFormat or GifFormat;
     }
 
     public async Task<string?> SaveImageAsync(IFormFile imageFile)

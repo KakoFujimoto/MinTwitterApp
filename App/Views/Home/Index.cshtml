@@ -4,9 +4,12 @@
 
 <div class="text-center">
     <h1 class="display-4">MinTwitterApp</h1>
-    <p>
-        <a asp-controller="Auth" asp-action="Register" class="btn btn-link">会員登録ページへ</a>
-    </p>
+    @if (User.Identity?.IsAuthenticated == false)
+    {
+        <p>
+            <a asp-controller="Auth" asp-action="Register" class="btn btn-link">会員登録ページへ</a>
+        </p>
+    }
 
     @if (User.Identity?.IsAuthenticated == true)
     {

@@ -8,6 +8,7 @@ public class PostErrorMessages : IPostErrorMessages
     {
         // 投稿・編集用
         { PostErrorCode.ContentEmpty, "内容を入力してください。" },
+        { PostErrorCode.ContentTooLong, "内容は280文字以内で入力してください。" },
         { PostErrorCode.InvalidImageExtension, "対応していない画像形式です。jpg, png, gif を使用してください。" },
         { PostErrorCode.InvalidImageFormat, "画像ファイルが正しくありません。" },
         { PostErrorCode.ImageReadError, "画像の読み込み中にエラーが発生しました。" },

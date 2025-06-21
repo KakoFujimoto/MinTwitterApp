@@ -5,6 +5,7 @@ public enum PostErrorCode
     // 投稿・編集用
     None,                     // エラーなし
     ContentEmpty,             // コンテンツが空
+    ContentTooLong,           // コンテンツが長すぎる
     InvalidImageExtension,    // 画像の拡張子が不正
     InvalidImageFormat,       // 画像フォーマットが不正
     ImageReadError,           // 画像の読み込みエラー

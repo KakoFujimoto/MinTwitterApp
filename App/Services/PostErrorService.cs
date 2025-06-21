@@ -9,6 +9,8 @@ namespace MinTwitterApp.Services;
 public class PostErrorService
 {
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+
+    private const int MaxContentLength = 280;
     private readonly ImageFormatDetector _detector;
 
     public PostErrorService(ImageFormatDetector detector)
@@ -18,9 +20,15 @@ public class PostErrorService
 
     public PostErrorCode ValidateContent(string? content)
     {
-        return string.IsNullOrWhiteSpace(content)
-            ? PostErrorCode.ContentEmpty
-            : PostErrorCode.None;
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return PostErrorCode.ContentEmpty;
+        }
+        if (content.Length > MaxContentLength)
+        {
+            return PostErrorCode.ContentTooLong;
+        }
+        return PostErrorCode.None;
     }
 
     public PostErrorCode ValidateImage(IFormFile? imageFile)
@@ -28,12 +36,12 @@ public class PostErrorService
         if (imageFile == null || imageFile.Length == 0)
             return PostErrorCode.None;
 
-        
+
         var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
         if (!AllowedExtensions.Contains(ext))
         {
             return PostErrorCode.InvalidImageExtension;
-    }
+        }
 
         var format = _detector.DetectFormat(imageFile);
         if (!IsSupportedFormat(format))
@@ -42,7 +50,7 @@ public class PostErrorService
         return PostErrorCode.None;
     }
 
-   public bool IsSupportedFormat(IImageFormat? format)
+    public bool IsSupportedFormat(IImageFormat? format)
     {
         return format is JpegFormat or PngFormat or GifFormat;
     }

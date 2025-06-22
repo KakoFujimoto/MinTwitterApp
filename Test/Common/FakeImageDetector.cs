@@ -8,7 +8,7 @@ namespace MinTwitterApp.Tests.Common;
 public class FakeImageFormatDetector : ImageFormatDetector
 {
     public new IImageFormat DetectFormat(IFormFile file) => new FakeImageFormat();
-    public new bool IsSupportedFormat(IImageFormat format) => true;
+    public bool IsSupportedFormat(IImageFormat format) => true;
 
     private class FakeImageFormat : IImageFormat
     {

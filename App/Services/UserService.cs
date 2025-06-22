@@ -1,7 +1,9 @@
 using MinTwitterApp.Data;
 using MinTwitterApp.Models;
 using MinTwitterApp.Enums;
+using MinTwitterApp.Common;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace MinTwitterApp.Services;
 
@@ -41,7 +43,8 @@ public class UserService
         User user;
         try
         {
-            user = User.Create(name, email, hash);
+            var dateTimeAccessor = new DateTimeAccessor();
+            user = User.Create(dateTimeAccessor, name, email, hash);
         }
         catch
         {

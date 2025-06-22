@@ -37,3 +37,7 @@ body {
     border-radius: 8px;
     cursor: pointer;
 }
+
+.content {
+  white-space: pre-wrap;
+}

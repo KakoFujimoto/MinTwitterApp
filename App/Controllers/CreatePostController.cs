@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.DTO;
+using MinTwitterApp.Common;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MinTwitterApp.Controllers;
@@ -14,27 +15,41 @@ public class CreatePostController : Controller
 
     private readonly IPostErrorMessages _postErrorMessages;
 
+    private readonly LoginUser _loginUser;
+
     public CreatePostController(
         CreatePostService createPostService,
         ViewPostService viewPostService,
-        IPostErrorMessages postErrorMessages)
+        IPostErrorMessages postErrorMessages,
+        LoginUser loginUser)
     {
         _createPostService = createPostService;
         _viewPostService = viewPostService;
         _postErrorMessages = postErrorMessages;
+        _loginUser = loginUser;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var posts = await _viewPostService.GetAllPostsAsync();
+        var currentUserId = int.Parse(_loginUser.GetUserId());
+        var posts = await _viewPostService.GetAllPostsAsync(currentUserId);
+
+        var inputUserId = _loginUser.GetUserId();
+        if (!int.TryParse(inputUserId, out int userId))
+        {
+            return Unauthorized();
+        }
+
         var dto = new CreatePostDTO
         {
-            Posts = posts
+            Posts = posts,
+            CurrentUserId = userId
         };
 
         return View("Create", dto);
     }
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -42,7 +57,8 @@ public class CreatePostController : Controller
     {
         if (!ModelState.IsValid)
         {
-            dto.Posts = await _viewPostService.GetAllPostsAsync();
+            var currentUserId = int.Parse(_loginUser.GetUserId());
+            dto.Posts = await _viewPostService.GetAllPostsAsync(currentUserId);
             return View("Create", dto);
         }
 
@@ -70,7 +86,8 @@ public class CreatePostController : Controller
 
         if (!ModelState.IsValid)
         {
-            dto.Posts = await _viewPostService.GetAllPostsAsync();
+            var currentUserId = int.Parse(_loginUser.GetUserId());
+            dto.Posts = await _viewPostService.GetAllPostsAsync(currentUserId);
             return View("Create", dto);
         }
 

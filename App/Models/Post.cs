@@ -17,6 +17,8 @@ public class Post
 
     public DateTime? UpdatedAt { get; set; }
 
+    public bool IsDeleted { get; set; }
+
     public int UserId { get; set; }
 
     public User User { get; set; } = null!;

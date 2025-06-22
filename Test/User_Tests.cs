@@ -3,6 +3,7 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Models;
 using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
+using MinTwitterApp.Tests.Common;
 
 namespace MinTwitterApp.Tests;
 
@@ -27,21 +28,38 @@ public class User_Tests : IDisposable
         var email = "test@example.com";
         var passwordHash = "hashedPassword";
 
-        var user = User.Create(name, email, passwordHash);
+        // 中でDateTime.UtcNowを使わずに、IDateTimeAccessorを受け取って使うようにする
+        //  - 稼働時はDateTimeAccessorを利用する
+        //  - テスト中はDateTimeAccessorForUnitTestを利用する
+        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
+        var user = User.Create(dateTimeAccessor, name, email, passwordHash);
 
         Assert.Equal(name, user.Name);
         Assert.Equal(email, user.Email);
         Assert.Equal(passwordHash, user.PassWordHash);
-        Assert.True((DateTime.UtcNow - user.CreatedAt).TotalSeconds < 5);
+        // Assert.True((DateTime.UtcNow - user.CreatedAt).TotalSeconds < 5);
+        Assert.Equal(dateTimeAccessor.Now, user.CreatedAt);
     }
+
+    // テストだけのコード
+    // class DateTimeAccessorForUnitTest
+    //     : IDateTimeAccessor
+    // {
+    //     public DateTime Now => new DateTime(2000, 2, 3, 4, 5, 6);
+    // }
+
+
 
     [Fact]
     public void DuplicateEmail_Error_Test()
     {
         using var transaction = db.Database.BeginTransaction();
 
-        var user1 = User.Create("User1", "test@example.com", "pw1");
-        var user2 = User.Create("User2", "test@example.com", "pw2");
+        
+        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
+
+        var user1 = User.Create(dateTimeAccessor,"User1", "test@example.com", "pw1");
+        var user2 = User.Create(dateTimeAccessor,"User2", "test@example.com", "pw2");
 
         db.Users.Add(user1);
         db.Users.Add(user2);
@@ -61,9 +79,10 @@ public class User_Tests : IDisposable
         var userService = new UserService(db, passwordService, userErrorService);
         var authService = new AuthService(db, passwordService, userService);
 
+        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
         var rawPassword = "examplepassword";
         var hashedPassword = passwordService.Hash(rawPassword);
-        var user = User.Create("testuser", "test@example.com", hashedPassword);
+        var user = User.Create(dateTimeAccessor,"testuser", "test@example.com", hashedPassword);
 
         db.Users.Add(user);
         db.SaveChanges();
@@ -86,9 +105,10 @@ public class User_Tests : IDisposable
         var userService = new UserService(db, passwordService, userErrorService);
         var authService = new AuthService(db, passwordService, userService);
 
+        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
         var rawPassword = "examplepassword";
         var hashedPassword = passwordService.Hash(rawPassword);
-        var user = User.Create("testuser", "test@example.com", hashedPassword);
+        var user = User.Create(dateTimeAccessor,"testuser", "test@example.com", hashedPassword);
 
         db.Users.Add(user);
         db.SaveChanges();
@@ -110,10 +130,11 @@ public class User_Tests : IDisposable
         var userService = new UserService(db, passwordService, userErrorService);
         var authService = new AuthService(db, passwordService, userService);
 
+        var dateTimeAccessor = new DateTimeAccessorForUnitTest();
         var rawPassword = "examplepassword";
         var wrongPassword = "wrongpassword";
         var hashedPassword = passwordService.Hash(rawPassword);
-        var user = User.Create("testuser", "test@example.com", hashedPassword);
+        var user = User.Create(dateTimeAccessor,"testuser", "test@example.com", hashedPassword);
 
         db.Users.Add(user);
         db.SaveChanges();

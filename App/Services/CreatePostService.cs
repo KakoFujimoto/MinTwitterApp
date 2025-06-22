@@ -2,6 +2,7 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace MinTwitterApp.Services;
 
@@ -18,17 +19,22 @@ public class CreatePostService
 
     public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> CreateAsync(int userId, string content, IFormFile? imageFile)
     {
-
         var contentError = _postErrorService.ValidateContent(content);
         if (contentError != PostErrorCode.None)
         {
             return (contentError, null);
         }
 
-        var (imageError, savedImagePath) = await _postErrorService.ValidateAndSaveImageAsync(imageFile);
-        if (imageError != PostErrorCode.None)
+        var imageValidationError = _postErrorService.ValidateImage(imageFile);
+        if (imageValidationError != PostErrorCode.None)
         {
-            return (imageError, null);
+            return (imageValidationError, null);
+        }
+
+        string? savedImagePath = null;
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            savedImagePath = await _postErrorService.SaveImageAsync(imageFile);
         }
 
         var post = new Post
@@ -42,13 +48,23 @@ public class CreatePostService
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();
 
+        var savedPost = await _db.Posts
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == post.Id);
+
+        if (savedPost == null)
+        {
+            return (PostErrorCode.NotFound, null);
+        }
+
         var dto = new PostPageDTO
         {
-            Id = post.Id,
-            Content = post.Content,
-            ImagePath = post.ImagePath,
-            UserId = post.UserId,
-            CreatedAt = post.CreatedAt
+            Id = savedPost.Id,
+            Content = savedPost.Content,
+            ImagePath = savedPost.ImagePath,
+            UserId = savedPost.UserId,
+            UserName = savedPost.User.Name,
+            CreatedAt = savedPost.CreatedAt
         };
 
         return (PostErrorCode.None, dto);

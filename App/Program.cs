@@ -1,11 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using MinTwitterApp.Data;
 using MinTwitterApp.Services;
+using MinTwitterApp.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<MinTwitterApp.Filters.GlobalExceptionFilter>();
+});
+
 
 builder.Services.AddSession(options =>
 {
@@ -17,7 +22,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+// builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PasswordService>();
@@ -28,6 +34,12 @@ builder.Services.AddScoped<CreatePostService>();
 builder.Services.AddScoped<ViewPostService>();
 builder.Services.AddScoped<PostErrorService>();
 builder.Services.AddScoped<IPostErrorMessages, PostErrorMessages>();
+builder.Services.AddScoped<DeletePostService>();
+builder.Services.AddScoped<EditPostService>();
+builder.Services.AddSingleton<IDateTimeAccessor, DateTimeAccessor>();
+builder.Services.AddScoped<LikePostService>();
+builder.Services.AddScoped<LoginUser>();
+builder.Services.AddScoped<ImageFormatDetector>();
 
 
 
@@ -66,5 +78,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapControllers();
 
 app.Run();

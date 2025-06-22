@@ -9,6 +9,7 @@
     </div>
 }
 
+<div asp-validation-summary="All" class="text-danger"></div>
 <form asp-action="Login" method="post">
     <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
     <div>

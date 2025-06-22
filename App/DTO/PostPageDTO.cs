@@ -10,5 +10,12 @@ public class PostPageDTO
 
     public int UserId { get; set; }
 
+    public string? UserName { get; set; }
+
     public DateTime CreatedAt { get; set; }
+
+    public int LikeCount { get; set; }
+
+    public bool IsLiked { get; set; }
+
 }

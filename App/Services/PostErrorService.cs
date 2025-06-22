@@ -1,6 +1,8 @@
 using MinTwitterApp.Enums;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Gif;
 
 namespace MinTwitterApp.Services;
 
@@ -8,62 +10,64 @@ public class PostErrorService
 {
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
 
-    public PostErrorCode ValidateContent(string content)
+    private const int MaxContentLength = 280;
+    private readonly ImageFormatDetector _detector;
+
+    public PostErrorService(ImageFormatDetector detector)
+    {
+        _detector = detector;
+    }
+
+    public PostErrorCode ValidateContent(string? content)
     {
         if (string.IsNullOrWhiteSpace(content))
         {
             return PostErrorCode.ContentEmpty;
         }
-
+        if (content.Length > MaxContentLength)
+        {
+            return PostErrorCode.ContentTooLong;
+        }
         return PostErrorCode.None;
     }
 
-    public async Task<(PostErrorCode ErrorCode, string? SavedImagePath)> ValidateAndSaveImageAsync(IFormFile? imageFile)
+    public PostErrorCode ValidateImage(IFormFile? imageFile)
     {
         if (imageFile == null || imageFile.Length == 0)
-        {
-            return (PostErrorCode.None, null);
-        }
+            return PostErrorCode.None;
+
 
         var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
         if (!AllowedExtensions.Contains(ext))
         {
-            return (PostErrorCode.InvalidImageExtension, null);
+            return PostErrorCode.InvalidImageExtension;
         }
 
-        try
-        {
-            using var imageStream = imageFile.OpenReadStream();
-            IImageFormat? format = Image.DetectFormat(imageStream);
+        var format = _detector.DetectFormat(imageFile);
+        if (!IsSupportedFormat(format))
+            return PostErrorCode.InvalidImageFormat;
 
-            if (format == null || (format.Name != "JPEG" && format.Name != "PNG" && format.Name != "GIF"))
-            {
-                return (PostErrorCode.InvalidImageFormat, null);
-            }
+        return PostErrorCode.None;
+    }
 
-            imageStream.Position = 0;
+    public bool IsSupportedFormat(IImageFormat? format)
+    {
+        return format is JpegFormat or PngFormat or GifFormat;
+    }
 
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            Directory.CreateDirectory(uploadsFolder);
+    public async Task<string?> SaveImageAsync(IFormFile imageFile)
+    {
+        var ext = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        Directory.CreateDirectory(uploadsFolder);
 
-            var uniqueFileName = Guid.NewGuid().ToString() + ext;
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        var uniqueFileName = Guid.NewGuid().ToString() + ext;
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            using (var output = new FileStream(filePath, FileMode.Create))
-            {
-                await imageStream.CopyToAsync(output);
-            }
+        using var imageStream = imageFile.OpenReadStream();
+        using var output = new FileStream(filePath, FileMode.Create);
+        await imageStream.CopyToAsync(output);
 
-            var savedPath = "/uploads/" + uniqueFileName;
-            return (PostErrorCode.None, savedPath);
-        }
-        catch (UnknownImageFormatException)
-        {
-            return (PostErrorCode.InvalidImageFormat, null);
-        }
-        catch
-        {
-            return (PostErrorCode.ImageReadError, null);
-        }
+        return "/uploads/" + uniqueFileName;
     }
 }

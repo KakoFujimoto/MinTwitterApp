@@ -87,7 +87,7 @@ public class AuthController : Controller
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.Name),
-            new(ClaimTypes.Email, user.Email)
+            new(ClaimTypes.Email, user.Email),
         };
 
         var identity = new ClaimsIdentity(claims, "MyCookieAuth");
@@ -114,7 +114,7 @@ public class AuthController : Controller
         _sessionService.Clear();
 
         TempData["Message"] = "ログアウトしました。";
-        return RedirectToAction("Login", "Auth");
+        return RedirectToAction("Index", "Home");
     }
 
 }

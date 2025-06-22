@@ -37,34 +37,34 @@
                 <div id="display-@postId">
                     <h6>@(post.UserName ?? "未設定")</h6>
                     <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
-                    <p class="content">@post.Content</p>
-                    <div class="d-flex align-items-center">
-                        <span style="display:none;" id="user-id-@post.Id" data-user-id="@Model.CurrentUserId"></span>
-                        <button class="btn btn-link p-0" onclick="toggleLike(@post.Id)">
-                            <i class="fas fa-heart @(post.IsLiked ? "text-danger" : "")" id="heart-icon-@post.Id"></i>
-                        </button>
-                        <span id="like-count-@post.Id" class="ms-2">@post.LikeCount</span>
-                    </div>
-
-
-
                     @if (!string.IsNullOrEmpty(post.ImagePath))
                     {
                         <a href="@post.ImagePath" target="_blank">
                             <img src="@post.ImagePath" class="post-image">
                         </a>
                     }
-
-                    @if (User.Identity?.IsAuthenticated == true &&
-                                loginUser.GetUserId() == post.UserId.ToString())
-                    {
-                        <button type="button" class="btn btn-link p-0 ms-2 text-secondary" onclick="toggleEdit(@post.Id)">
-                            <i class="fas fa-edit"></i>
+                    <p class="content">@post.Content</p>
+                    <div class="d-flex align-items-center">
+                        <span style="display:none;" id="user-id-@post.Id" data-user-id="@Model.CurrentUserId"></span>
+                        <!-- いいねボタン -->
+                        <button class="btn btn-link p-0" onclick="toggleLike(@post.Id)">
+                            <i class="fas fa-heart @(post.IsLiked ? "text-danger" : "")" id="heart-icon-@post.Id"></i>
                         </button>
-                    }
+                        <!-- いいね数カウント -->
+                        <span id="like-count-@post.Id" class="ms-2">@post.LikeCount</span>
+
+                        <!-- 編集ボタン(投稿者のみに表示) -->
+                        @if (User.Identity?.IsAuthenticated == true &&
+                                        loginUser.GetUserId() == post.UserId.ToString())
+                        {
+                            <button type="button" class="btn btn-link p-0 ms-2 text-secondary" onclick="toggleEdit(@post.Id)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        }
+                    </div>
                 </div>
 
-                <!-- 編集フォーム（初期は非表示） -->
+                <!-- 編集フォーム（編集ボタンを押すと展開） -->
                 <div id="edit-@postId" style="display: none;">
                     <form onsubmit="event.preventDefault(); saveEdit(@postId)" enctype="multipart/form-data">
                         <textarea id="edit-content-@postId" class="form-control mb-2">@post.Content</textarea>

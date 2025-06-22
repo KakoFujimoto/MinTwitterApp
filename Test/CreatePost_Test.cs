@@ -6,11 +6,11 @@ using MinTwitterApp.Tests.Common;
 
 namespace MinTwitterApp.Tests;
 
-public class PostService_Tests : IDisposable
+public class CreatePost_Tests : IDisposable
 {
     private readonly ApplicationDbContext db;
 
-    public PostService_Tests()
+    public CreatePost_Tests()
     {
         db = TestDbHelper.CreateDbContext();
     }
@@ -18,19 +18,6 @@ public class PostService_Tests : IDisposable
     public void Dispose()
     {
         db.Dispose();
-    }
-
-    [Fact]
-    public async Task CreatePostAsync_Empty_ShoudReturnError()
-    {
-        var imageDetector = new FakeImageFormatDetector();
-        var postErrorService = new PostErrorService(imageDetector);
-        var createPostService = new CreatePostService(db, postErrorService);
-
-        var result = await createPostService.CreateAsync(1, "", null);
-
-        Assert.Equal(PostErrorCode.ContentEmpty, result.ErrorCode);
-        Assert.Null(result.Post);
     }
 
     [Fact]
@@ -61,4 +48,18 @@ public class PostService_Tests : IDisposable
 
         transaction.Rollback();
     }
+
+    [Fact]
+    public async Task CreatePostAsync_Empty_ShoudReturnError()
+    {
+        var imageDetector = new FakeImageFormatDetector();
+        var postErrorService = new PostErrorService(imageDetector);
+        var createPostService = new CreatePostService(db, postErrorService);
+
+        var result = await createPostService.CreateAsync(1, "", null);
+
+        Assert.Equal(PostErrorCode.ContentEmpty, result.ErrorCode);
+        Assert.Null(result.Post);
+    }
+
 }

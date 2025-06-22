@@ -62,4 +62,18 @@ public class CreatePost_Tests : IDisposable
         Assert.Null(result.Post);
     }
 
+    [Fact]
+    public async Task CreatePostAsync_WithTooManyStrings_ShouldReturnError()
+    {
+        var imageDetector = new FakeImageFormatDetector();
+        var postErrorService = new PostErrorService(imageDetector);
+        var createPostService = new CreatePostService(db, postErrorService);
+
+        var longContent = new String('あ', 281);
+        var result = await createPostService.CreateAsync(1, longContent, null);
+
+        Assert.Equal(PostErrorCode.ContentTooLong, result.ErrorCode);
+        Assert.Null(result.Post);
+    }
+
 }

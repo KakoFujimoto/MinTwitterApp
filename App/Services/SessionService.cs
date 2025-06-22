@@ -1,6 +1,6 @@
 namespace MinTwitterApp.Services;
 
-public class SessionService : ISessionService
+public class SessionService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 

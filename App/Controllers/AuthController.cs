@@ -13,9 +13,9 @@ public class AuthController : Controller
     private readonly UserService _userService;
     private readonly AuthService _authService;
 
-    private readonly ISessionService _sessionService;
+    private readonly SessionService _sessionService;
 
-    public AuthController(UserService userService, AuthService authService, ISessionService sessionService)
+    public AuthController(UserService userService, AuthService authService, SessionService sessionService)
     {
         _userService = userService;
         _authService = authService;

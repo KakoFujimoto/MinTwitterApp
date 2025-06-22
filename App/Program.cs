@@ -28,7 +28,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<ISessionService, SessionService>();
+builder.Services.AddScoped<SessionService, SessionService>();
 builder.Services.AddScoped<UserErrorService>();
 builder.Services.AddScoped<CreatePostService>();
 builder.Services.AddScoped<ViewPostService>();

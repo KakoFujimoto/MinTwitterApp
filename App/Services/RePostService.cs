@@ -3,6 +3,7 @@ using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
+using MinTwitterApp.Dto;
 
 namespace MinTwitterApp.Services;
 
@@ -21,7 +22,7 @@ public class RePostService
         _dateTimeAccessor = dateTimeAccessor;
     }
 
-    public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> RePostAsync(
+    public async Task<(PostErrorCode ErrorCode, RePostDTO? Post)> RePostAsync(
         int userId,
         Guid originalPostId
         )
@@ -46,13 +47,20 @@ public class RePostService
         _db.Posts.Add(newPost);
         await _db.SaveChangesAsync();
 
-        // RePostDTOに渡すようにする
-        var postDto = new PostPageDTO
+        var sourceUser = await _db.Users.FindAsync(originalPost.UserId);
+
+        var postDto = new RePostDTO
         {
             Id = newPost.Id,
             Content = newPost.Content,
             CreatedAt = newPost.CreatedAt,
             ImagePath = newPost.ImagePath,
+            UserId = newPost.UserId,
+            UserName = (await _db.Users.FindAsync(newPost.UserId))?.Name ?? "Unknown",
+            RePostSourceId = originalPost.Id,
+            SourceUserName = originalPost.User.Name,
+            SourceContent = originalPost.Content
+
         };
 
         return (PostErrorCode.None, postDto);

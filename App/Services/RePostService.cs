@@ -2,32 +2,59 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
-using Microsoft.EntityFrameworkCore;
+using MinTwitterApp.Common;
 
 namespace MinTwitterApp.Services;
 
 public class RePostService
 {
     private readonly ApplicationDbContext _db;
-    private readonly PostErrorService _postErrorService;
 
-    public RePostService(ApplicationDbContext db, PostErrorService postErrorService)
+    private readonly IDateTimeAccessor _dateTimeAccessor;
+
+    public RePostService(
+        ApplicationDbContext db,
+        IDateTimeAccessor dateTimeAccessor
+        )
     {
         _db = db;
-        _postErrorService = postErrorService;
+        _dateTimeAccessor = dateTimeAccessor;
     }
 
-    public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> RePostAsync(Guid userId,
-    Guid originalPostId)
+    public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> RePostAsync(
+        int userId,
+        Guid originalPostId
+        )
     {
-        var original = await _db.Posts.FindAsync(originalPostId);
-        if (original == null || original.IsDeleted)
+        var originalPost = await _db.Posts.FindAsync(originalPostId);
+        if (originalPost == null || originalPost.IsDeleted)
         {
             return (PostErrorCode.NotFound, null);
         }
 
-        var repost = Post.Create{
+        var newPost = new Post
+        {
+            RepostSourceId = originalPostId,
+            UserId = userId,
+            Content = originalPost.Content,
+            CreatedAt = _dateTimeAccessor.Now,
+            UpdatedAt = null,
+            IsDeleted = false,
+            ImagePath = originalPost.ImagePath
+        };
 
-        }
+        _db.Posts.Add(newPost);
+        await _db.SaveChangesAsync();
+
+        // RePostDTOに渡すようにする
+        var postDto = new PostPageDTO
+        {
+            Id = newPost.Id,
+            Content = newPost.Content,
+            CreatedAt = newPost.CreatedAt,
+            ImagePath = newPost.ImagePath,
+        };
+
+        return (PostErrorCode.None, postDto);
     }
 }

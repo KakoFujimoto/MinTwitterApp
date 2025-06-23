@@ -12,7 +12,7 @@ public class RePostDTO
 
     public string? UserName { get; set; }
 
-    public Guid RePostSourceId { get; set; }
+    public int RePostSourceId { get; set; }
 
     public string? SourceUserName { get; set; }
 

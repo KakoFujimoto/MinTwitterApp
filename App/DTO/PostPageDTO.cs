@@ -18,4 +18,10 @@ public class PostPageDTO
 
     public bool IsLiked { get; set; }
 
+    public int? RepostSourceId { get; set; }
+
+    public string? SourceUserName { get; set; }
+
+    public string? SourceContent { get; set; }
+
 }

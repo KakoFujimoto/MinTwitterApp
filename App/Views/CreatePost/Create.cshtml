@@ -37,6 +37,13 @@
                 <div id="display-@postId">
                     <h6>@(post.UserName ?? "未設定")</h6>
                     <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
+                    @if (post.RepostSourceId != null)
+                    {
+                        <div class="alert alert-secondary mb-2">
+                            <small class="text-muted">リポスト元: @post.SourceUserName</small>
+                            <p class="mb-0">@post.SourceContent</p>
+                        </div>
+                    }
                     @if (!string.IsNullOrEmpty(post.ImagePath))
                     {
                         <a href="@post.ImagePath" target="_blank">

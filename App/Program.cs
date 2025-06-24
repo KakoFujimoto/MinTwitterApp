@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MinTwitterApp.Data;
 using MinTwitterApp.Services;
 using MinTwitterApp.Common;
+using Microsoft.Extensions.WebEncoders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,11 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<MinTwitterApp.Filters.GlobalExceptionFilter>();
 });
 
+// builder.Services.Configure<WebEncoderOptions>(options =>
+// {
+//     options.TextEncoderSettings = new System.Text.Encodings.Web.TextEncoderSettings(
+//     System.Text.Unicode.UnicodeRanges.All);
+// });
 
 builder.Services.AddSession(options =>
 {

@@ -71,12 +71,16 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+<input type="hidden" value="@TempData["Message"]" id="message" />
+
     @await RenderSectionAsync("Scripts", required: false)
     @if (TempData["Message"] != null)
     {
         <script>
             window.onload = function () {
-                alert(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Message"])));
+                // alert('@TempData["Message"]');
+                alert(document.getElementById("message").value);
+                @* alert(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Message"]))); *@
             };
         </script>
     }

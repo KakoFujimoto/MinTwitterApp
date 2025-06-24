@@ -24,4 +24,6 @@ public class PostPageDTO
 
     public string? SourceContent { get; set; }
 
+    public string? SourceImagePath { get; set; }
+
 }

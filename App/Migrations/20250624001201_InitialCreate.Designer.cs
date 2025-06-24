@@ -12,8 +12,8 @@ using MinTwitterApp.Data;
 namespace MinTwitterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250622132657_AddRepostSourceIdToPost")]
-    partial class AddRepostSourceIdToPost
+    [Migration("20250624001201_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,8 +74,8 @@ namespace MinTwitterApp.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("RepostSourceId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("RepostSourceId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");

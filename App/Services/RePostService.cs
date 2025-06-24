@@ -24,7 +24,7 @@ public class RePostService
 
     public async Task<(PostErrorCode ErrorCode, RePostDTO? Post)> RePostAsync(
         int userId,
-        Guid originalPostId
+        int originalPostId
         )
     {
         var originalPost = await _db.Posts.FindAsync(originalPostId);

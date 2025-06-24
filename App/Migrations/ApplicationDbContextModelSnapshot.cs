@@ -71,8 +71,8 @@ namespace MinTwitterApp.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("RepostSourceId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("RepostSourceId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");

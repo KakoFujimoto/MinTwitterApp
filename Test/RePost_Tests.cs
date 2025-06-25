@@ -43,16 +43,16 @@ public class RePost_Tests : IDisposable
         Assert.Equal(PostErrorCode.None, originalErrorCode);
         Assert.NotNull(originalPostDto);
 
-        var repostService = new RePostService(db, postErrorService);
-        (PostErrorCode rePostErrorCode, PostPageDTO? rePostDto) = await
-        rePostService.RePostAsync(user.Id, originalPostDto!.Id);
+        var repostService = new RePostService(db, dateTimeAccessorForUnitTest);
+        (PostErrorCode rePostErrorCode, RePostDTO? rePostDto) = await
+        repostService.RePostAsync(user.Id, originalPostDto!.Id);
 
         Assert.Equal(PostErrorCode.None, rePostErrorCode);
         Assert.NotNull(rePostDto);
 
         Assert.Equal(originalPostDto.Content, rePostDto.Content);
         Assert.NotEqual(originalPostDto.Id, rePostDto.Id);
-        Assert.Equal(originalPostDto.Id, rePostDto.RepostSourceId);
+        Assert.Equal(originalPostDto.Id, rePostDto.RePostSourceId);
 
         transaction.Rollback();
     }

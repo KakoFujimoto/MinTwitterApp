@@ -3,7 +3,6 @@ using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
-using MinTwitterApp.Dto;
 
 namespace MinTwitterApp.Services;
 

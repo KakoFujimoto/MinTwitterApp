@@ -1,4 +1,4 @@
-namespace MinTwitterApp.Dto;
+namespace MinTwitterApp.DTO;
 
 public class RePostDTO
 {

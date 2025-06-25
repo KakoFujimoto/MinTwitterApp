@@ -5,7 +5,7 @@ using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
 using Microsoft.EntityFrameworkCore;
 
-// DateTimeAccessorを使うようにした方が良さそう
+
 namespace MinTwitterApp.Services;
 
 public class CreatePostService
@@ -13,10 +13,16 @@ public class CreatePostService
     private readonly ApplicationDbContext _db;
     private readonly PostErrorService _postErrorService;
 
-    public CreatePostService(ApplicationDbContext db, PostErrorService postErrorService)
+    private IDateTimeAccessor _dateTimeAccessor;
+
+    public CreatePostService(
+        ApplicationDbContext db,
+        PostErrorService postErrorService,
+        IDateTimeAccessor dateTimeAccessor)
     {
         _db = db;
         _postErrorService = postErrorService;
+        _dateTimeAccessor = dateTimeAccessor;
     }
 
     public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> CreateAsync(int userId, string content, IFormFile? imageFile)
@@ -43,7 +49,7 @@ public class CreatePostService
         {
             UserId = userId,
             Content = content,
-            CreatedAt = DateTime.Now,
+            CreatedAt = _dateTimeAccessor.Now,
             ImagePath = savedImagePath
         };
 

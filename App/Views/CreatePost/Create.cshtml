@@ -166,7 +166,7 @@
             const res = await fetch("/api/Like/toggle", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: parseInt(userId), postId: postId })
+                body: JSON.stringify({ postId: postId })
             });
 
             if (!res.ok) {

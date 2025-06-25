@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using MinTwitterApp.Data;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Enums;

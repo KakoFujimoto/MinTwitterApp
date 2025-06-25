@@ -35,7 +35,7 @@ public class LikeCount_Tests : IDisposable
         db.Users.AddRange(user1, user2);
         db.SaveChanges();
 
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
         var (errorCode, postDto) = await createPostService.CreateAsync(user1.Id, "いいねされる投稿", null);
 
         Assert.Equal(PostErrorCode.None, errorCode);

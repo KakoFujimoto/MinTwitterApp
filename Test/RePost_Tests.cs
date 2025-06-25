@@ -12,6 +12,7 @@ public class RePost_Tests : IDisposable
     private readonly ApplicationDbContext db;
     private readonly DateTimeAccessorForUnitTest dateTimeAccessorForUnitTest;
 
+
     public RePost_Tests()
     {
         db = TestDbHelper.CreateDbContext();
@@ -36,7 +37,7 @@ public class RePost_Tests : IDisposable
         db.SaveChanges();
 
 
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
         (PostErrorCode originalErrorCode, PostPageDTO? originalPostDto) = await
         createPostService.CreateAsync(user.Id, "元の投稿", null);
 

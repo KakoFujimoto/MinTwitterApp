@@ -3,6 +3,7 @@ using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.Tests.Common;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace MinTwitterApp.Tests;
 
@@ -10,9 +11,13 @@ public class CreatePost_Tests : IDisposable
 {
     private readonly ApplicationDbContext db;
 
+    private readonly DateTimeAccessorForUnitTest dateTimeAccessorForUnitTest;
+
     public CreatePost_Tests()
     {
         db = TestDbHelper.CreateDbContext();
+        dateTimeAccessorForUnitTest = new DateTimeAccessorForUnitTest();
+
     }
 
     public void Dispose()
@@ -37,7 +42,7 @@ public class CreatePost_Tests : IDisposable
 
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
 
         var result = await createPostService.CreateAsync(user.Id, "テスト投稿", null);
 
@@ -54,7 +59,7 @@ public class CreatePost_Tests : IDisposable
     {
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
 
         var result = await createPostService.CreateAsync(1, "", null);
 
@@ -84,7 +89,7 @@ public class CreatePost_Tests : IDisposable
 
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
 
         var content = new string('あ', length);
         var result = await createPostService.CreateAsync(user.Id, content, null);

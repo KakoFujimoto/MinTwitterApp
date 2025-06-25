@@ -37,7 +37,7 @@ public class DeletePost_Tests : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
         var (errorCode, postDto) = await createPostService.CreateAsync(user.Id, "削除対象", null);
 
         Assert.Equal(PostErrorCode.None, errorCode);
@@ -74,7 +74,7 @@ public class DeletePost_Tests : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
         var (errorCode, postDto) = await createPostService.CreateAsync(user.Id, "既に削除された投稿", null);
 
         Assert.Equal(PostErrorCode.None, errorCode);

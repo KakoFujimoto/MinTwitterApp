@@ -34,7 +34,7 @@ public class LikePost_Tests : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
         var (errorCode, postDto) = await createPostService.CreateAsync(user.Id, "いいね対象の投稿", null);
 
         Assert.Equal(PostErrorCode.None, errorCode);

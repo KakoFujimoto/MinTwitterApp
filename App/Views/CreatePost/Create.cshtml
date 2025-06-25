@@ -42,7 +42,10 @@
                         <div class="alert alert-secondary mb-2">
                             <small class="text-muted">リポスト元: @post.SourceUserName</small>
                             <p class="mb-0">@post.SourceContent</p>
+                            @if (post.SourceImagePath != null)
+                            {
                             <img src="@post.SourceImagePath" class="post-image">
+                            }
                         </div>
                     }
                     @if (!string.IsNullOrEmpty(post.ImagePath))

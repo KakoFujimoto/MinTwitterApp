@@ -29,21 +29,40 @@
 
 @if (Model.Posts != null && Model.Posts.Any())
 {
-    <ul class="list-group">
+    <div class="list-group">
         @foreach (var post in Model.Posts)
         {
             var postId = post.Id;
-            <li class="list-group-item" id="post-@postId">
+            <div class="card" id="post-@postId">
                 <div id="display-@postId">
                     <h6>@(post.UserName ?? "未設定")</h6>
                     <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
-                    @if (!string.IsNullOrEmpty(post.ImagePath))
+
+                    <!-- リポストの場合  -->
+                    @if (post.RepostSourceId != null)
+                    {
+                        <div class="alert alert-secondary mb-2">
+                            <small class="text-muted">リポスト元: @post.SourceUserName</small>
+                            <p class="mb-0">@post.SourceContent</p>
+                            @if (post.SourceImagePath != null)
+                            {
+                            <img src="@post.SourceImagePath" class="post-image">
+                            }
+                        </div>
+                    }
+                    else
                     {
-                        <a href="@post.ImagePath" target="_blank">
-                            <img src="@post.ImagePath" class="post-image">
-                        </a>
+                        <!-- 元投稿  -->
+                        @if (!string.IsNullOrEmpty(post.ImagePath))
+                        {
+                            <a href="@post.ImagePath" target="_blank">
+                                <img src="@post.ImagePath" class="post-image">
+                            </a>
+                        }
+                        <p class="content">@post.Content</p>
                     }
-                    <p class="content">@post.Content</p>
+
+                    <!-- カードのフッター  -->
                     <div class="d-flex align-items-center">
                         <span style="display:none;" id="user-id-@post.Id" data-user-id="@Model.CurrentUserId"></span>
                         <!-- いいねボタン -->
@@ -61,6 +80,15 @@
                                 <i class="fas fa-edit"></i>
                             </button>
                         }
+                        
+                        <!-- リポストボタン -->
+                        <form asp-controller="RePost" asp-action="Create" method="post" class="ms-2">
+                            <input type="hidden" name="originalPostId" value="@post.Id" />
+                            <button type="submit" class="btn btn-link p-0 text-info">
+                                <i class="fas fa-retweet"></i>
+                            </button>
+                        </form>
+
                     </div>
                 </div>
 
@@ -79,9 +107,9 @@
                     </form>
                 </div>
 
-            </li>
+            </div>
         }
-    </ul>
+    </div>
 }
 
 @section Scripts {
@@ -149,7 +177,7 @@
             const res = await fetch("/api/Like/toggle", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: parseInt(userId), postId: postId })
+                body: JSON.stringify({ postId: postId })
             });
 
             if (!res.ok) {

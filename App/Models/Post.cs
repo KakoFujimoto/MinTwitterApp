@@ -23,4 +23,6 @@ public class Post
 
     public User User { get; set; } = null!;
 
+    public int? RepostSourceId { get; set; }
+
 }

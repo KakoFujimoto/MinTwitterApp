@@ -36,7 +36,7 @@ public class EditPost_Tests : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
         (PostErrorCode errorCode, PostPageDTO? postDto) = await createPostService.CreateAsync(user.Id, "編集前の内容", null);
 
         Assert.Equal(PostErrorCode.None, errorCode);
@@ -78,7 +78,7 @@ public class EditPost_Tests : IDisposable
         db.Users.Add(user);
         db.SaveChanges();
 
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
         (PostErrorCode errorCode, PostPageDTO? postDto) = await createPostService.CreateAsync(user.Id, "削除される投稿", null);
 
         Assert.Equal(PostErrorCode.None, errorCode);

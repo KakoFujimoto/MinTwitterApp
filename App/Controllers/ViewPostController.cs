@@ -20,7 +20,10 @@ public class ViewPostController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var currentUserId = int.Parse(_loginuser.GetUserId());
+        if (!int.TryParse(_loginuser.GetUserId(), out var currentUserId))
+        {
+            return BadRequest("ユーザーIDが無効です。");
+        }
         var posts = await _viewPostService.GetAllPostsAsync(currentUserId);
         return View("Index", posts);
     }

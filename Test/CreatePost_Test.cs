@@ -3,6 +3,7 @@ using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.Tests.Common;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace MinTwitterApp.Tests;
 
@@ -10,9 +11,13 @@ public class CreatePost_Tests : IDisposable
 {
     private readonly ApplicationDbContext db;
 
+    private readonly DateTimeAccessorForUnitTest dateTimeAccessorForUnitTest;
+
     public CreatePost_Tests()
     {
         db = TestDbHelper.CreateDbContext();
+        dateTimeAccessorForUnitTest = new DateTimeAccessorForUnitTest();
+
     }
 
     public void Dispose()
@@ -37,7 +42,7 @@ public class CreatePost_Tests : IDisposable
 
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
 
         var result = await createPostService.CreateAsync(user.Id, "テスト投稿", null);
 
@@ -54,7 +59,7 @@ public class CreatePost_Tests : IDisposable
     {
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
 
         var result = await createPostService.CreateAsync(1, "", null);
 
@@ -62,18 +67,46 @@ public class CreatePost_Tests : IDisposable
         Assert.Null(result.Post);
     }
 
-    [Fact]
-    public async Task CreatePostAsync_WithTooManyStrings_ShouldReturnError()
+    [Theory]
+    [InlineData(279, PostErrorCode.None)]
+    [InlineData(280, PostErrorCode.None)]
+    [InlineData(281, PostErrorCode.ContentTooLong)]
+    [InlineData(282, PostErrorCode.ContentTooLong)]
+
+    public async Task CreatePostAsync_VariousLengths_ShouldReturnExpectedError(int length, PostErrorCode expectedError)
     {
+        using var transaction = db.Database.BeginTransaction();
+
+        var user = new User
+        {
+            Name = "テストユーザー",
+            Email = "test@example.com",
+            PassWordHash = "dummyhash"
+        };
+
+        db.Users.Add(user);
+        db.SaveChanges();
+
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
-        var createPostService = new CreatePostService(db, postErrorService);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
 
-        var longContent = new String('あ', 281);
-        var result = await createPostService.CreateAsync(1, longContent, null);
+        var content = new string('あ', length);
+        var result = await createPostService.CreateAsync(user.Id, content, null);
 
-        Assert.Equal(PostErrorCode.ContentTooLong, result.ErrorCode);
-        Assert.Null(result.Post);
+        Assert.Equal(expectedError, result.ErrorCode);
+
+        if (expectedError == PostErrorCode.None)
+        {
+            Assert.NotNull(result.Post);
+            Assert.Equal(content, result.Post!.Content);
+        }
+        else
+        {
+            Assert.Null(result.Post);
+        }
+
+        transaction.Rollback();
     }
 
 }

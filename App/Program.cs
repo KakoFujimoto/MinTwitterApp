@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MinTwitterApp.Data;
 using MinTwitterApp.Services;
 using MinTwitterApp.Common;
+using Microsoft.Extensions.WebEncoders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,11 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<MinTwitterApp.Filters.GlobalExceptionFilter>();
 });
 
+// builder.Services.Configure<WebEncoderOptions>(options =>
+// {
+//     options.TextEncoderSettings = new System.Text.Encodings.Web.TextEncoderSettings(
+//     System.Text.Unicode.UnicodeRanges.All);
+// });
 
 builder.Services.AddSession(options =>
 {
@@ -38,6 +44,7 @@ builder.Services.AddScoped<DeletePostService>();
 builder.Services.AddScoped<EditPostService>();
 builder.Services.AddSingleton<IDateTimeAccessor, DateTimeAccessor>();
 builder.Services.AddScoped<LikePostService>();
+builder.Services.AddScoped<RePostService>();
 builder.Services.AddScoped<LoginUser>();
 builder.Services.AddScoped<ImageFormatDetector>();
 

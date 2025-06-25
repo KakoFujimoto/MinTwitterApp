@@ -41,3 +41,11 @@ body {
 .content {
   white-space: pre-wrap;
 }
+
+.card {
+  padding: 1rem;
+}
+
+.card + .card {
+  margin-top: 1rem;
+}

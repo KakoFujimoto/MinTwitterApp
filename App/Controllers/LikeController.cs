@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.DTO;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace MinTwitterApp.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class LikeController : ControllerBase
 {
@@ -17,8 +20,13 @@ public class LikeController : ControllerBase
 
     [HttpPost("toggle")]
     public async Task<ActionResult<LikeResultDTO>> ToggleLike([FromBody] ToggleLikeRequest request)
-    {
-        var result = await likePostService.ToggleLikeAsync(request.UserId, request.PostId);
+    {   
+        var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userClaim == null || !int.TryParse(userClaim.Value, out int userId))
+        {
+            return Unauthorized("ログインユーザーが特定できません。");
+        }
+        var result = await likePostService.ToggleLikeAsync(userId, request.PostId);
         return Ok(result);
     }
 

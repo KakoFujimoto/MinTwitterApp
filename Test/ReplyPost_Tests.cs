@@ -3,9 +3,6 @@ using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.Tests.Common;
-using Microsoft.Identity.Client;
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 
 namespace MinTwitterApp.Tests;
 
@@ -43,7 +40,7 @@ public class ReplyPost_Tests : IDisposable
         Assert.NotNull(originalPostDto);
 
         var replyService = new ReplyPostService(db, postErrorService, dateTimeAccessorForUnitTest);
-        var (replyError, replyPostDto) = await replyService.CreateRepyAsync(user.Id, originalPostDto!.Id, "返信内容");
+        var (replyError, replyPostDto) = await replyService.ReplyPostAsync(user.Id, originalPostDto!.Id, "返信内容");
 
         Assert.Equal(PostErrorCode.None, replyError);
         Assert.NotNull(replyPostDto);
@@ -61,7 +58,7 @@ public class ReplyPost_Tests : IDisposable
         var imageDetector = new FakeImageFormatDetector();
         var postErrorService = new PostErrorService(imageDetector);
         var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
-        var replyPostService = new ReplyPost_Service(db, postErrorService, dateTimeAccessorForUnitTest);
+        var replyPostService = new ReplyPostService(db, postErrorService, dateTimeAccessorForUnitTest);
 
         var user = User.Create(dateTimeAccessorForUnitTest, "リプライユーザー", "replyuser@test.com", "hashedPassword");
         db.Users.Add(user);
@@ -75,7 +72,7 @@ public class ReplyPost_Tests : IDisposable
         deletedPost.IsDeleted = true;
         db.SaveChanges();
 
-        var result = await replyPostService.CreateRepyAsync(user.Id, deletedPost.Id, "リプライ本文");
+        var result = await replyPostService.ReplyPostAsync(user.Id, deletedPost.Id, "リプライ本文");
 
         Assert.Equal(PostErrorCode.NotFound, result.errorCode);
         Assert.NotNull(result.Post);

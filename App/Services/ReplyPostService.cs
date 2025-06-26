@@ -3,9 +3,6 @@ using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography.X509Certificates;
-using Azure.Identity;
 
 namespace MinTwitterApp.Services;
 
@@ -58,7 +55,6 @@ public class ReplyPostService
             RepostSourceId = null
         };
 
-        // ReplyToPostIdをPostプロパティに足す必要がある
         replyPost.ReplyToPostId = originalPostId;
 
         _db.Posts.Add(replyPost);

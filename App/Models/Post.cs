@@ -25,4 +25,6 @@ public class Post
 
     public int? RepostSourceId { get; set; }
 
+    public int? ReplyToPostId { get; set; }
+
 }

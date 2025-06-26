@@ -75,7 +75,7 @@ public class ReplyPost_Tests : IDisposable
         var result = await replyPostService.ReplyPostAsync(user.Id, deletedPost.Id, "リプライ本文");
 
         Assert.Equal(PostErrorCode.NotFound, result.errorCode);
-        Assert.NotNull(result.Post);
+        Assert.Null(result.Post);
 
         transaction.Rollback();
 

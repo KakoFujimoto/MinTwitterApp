@@ -3,6 +3,9 @@ using MinTwitterApp.Services;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.Tests.Common;
+using Microsoft.Identity.Client;
+using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 
 namespace MinTwitterApp.Tests;
 
@@ -48,6 +51,37 @@ public class ReplyPost_Tests : IDisposable
         Assert.Equal(originalPostDto.Id, replyPostDto.ReplyToPostId);
 
         transaction.Rollback();
+    }
+
+    [Fact]
+    public async Task ReplyPost_WhenOriginalPostDeleted_ShouldReturnNotFoundError()
+    {
+        using var transaction = db.Database.BeginTransaction();
+
+        var imageDetector = new FakeImageFormatDetector();
+        var postErrorService = new PostErrorService(imageDetector);
+        var createPostService = new CreatePostService(db, postErrorService, dateTimeAccessorForUnitTest);
+        var replyPostService = new ReplyPost_Service(db, postErrorService, dateTimeAccessorForUnitTest);
+
+        var user = User.Create(dateTimeAccessorForUnitTest, "リプライユーザー", "replyuser@test.com", "hashedPassword");
+        db.Users.Add(user);
+        db.SaveChanges();
+
+        var (errorCode, postDto) = await createPostService.CreateAsync(user.Id, "削除された投稿", null);
+        Assert.Equal(PostErrorCode.None, errorCode);
+        Assert.NotNull(postDto);
+
+        var deletedPost = db.Posts.First(p => p.Id == postDto!.Id);
+        deletedPost.IsDeleted = true;
+        db.SaveChanges();
+
+        var result = await replyPostService.CreateRepyAsync(user.Id, deletedPost.Id, "リプライ本文");
+
+        Assert.Equal(PostErrorCode.NotFound, result.errorCode);
+        Assert.NotNull(result.Post);
+
+        transaction.Rollback();
+
     }
 
 }

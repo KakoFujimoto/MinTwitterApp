@@ -60,19 +60,25 @@
                             </a>
                         }
                         <p class="content">@post.Content</p>
-                            @if (post.Replies != null && post.Replies.Any())
+                        @if (post.Replies != null && post.Replies.Any())
+                        {
+                            <div class="mt-2 ps-3 border-start border-2">
+                                @foreach (var reply in post.Replies)
                                 {
-                                    <div class="mt-2 ps-3 border-start border-2">
-                                        @foreach (var reply in post.Replies)
+                                    <div class="border rounded p-2 mb-1 bg-light">
+                                        <h6>@reply.UserName</h6>
+                                        <small class="text-muted"> @reply.CreatedAt.ToString("yyyy/MM/dd HH:mm")</small>
+                                        @if (!string.IsNullOrEmpty(reply.ImagePath))
                                         {
-                                            <div class="border rounded p-2 mb-1 bg-light">
-                                                <h6>@reply.UserName</h6>
-                                                <small class="text-muted"> @reply.CreatedAt.ToString("yyyy/MM/dd HH:mm")</small>
-                                                <p class="mb-0 content">@reply.Content</p>
-                                            </div>
+                                            <a href="@reply.ImagePath" target="_blank">
+                                                <img src="@reply.ImagePath" class="post-image">
+                                            </a>
                                         }
+                                        <p class="mb-0 content">@reply.Content</p>
                                     </div>
                                 }
+                            </div>
+                        }
                     }
 
                     <!-- カードのフッター  -->
@@ -108,11 +114,27 @@
                         </button>
 
                         <!-- リプライフォーム（初期は非表示） -->
-                        <div id="reply-form-@post.Id" style="display: none;" class="mt-2">
-                            <textarea id="reply-content-@post.Id" class="form-control mb-2" rows="2" placeholder="返信内容を入力..."></textarea>
-                            <button class="btn btn-sm btn-primary" onclick="submitReply(@post.Id)">返信</button>
-                            <button class="btn btn-sm btn-secondary" onclick="toggleReply(@post.Id)">キャンセル</button>
+                        <div id="reply-form-@post.Id" style="display: none;" class="mt-2 border p-3 rounded bg-light">
+                            <div class="form-group mb-2">
+                                <label for="reply-content-@post.Id" class="form-label">返信内容</label>
+                                <textarea id="reply-content-@post.Id" class="form-control" rows="3"
+                            placeholder="返信内容を入力してください"></textarea>
+                            </div>
+
+                            <div class="form-group mb-2">
+                                <label for="reply-image-@post.Id" class="form-label">画像をアップロード (※jpg, png, gif)</label>
+                                <input id="reply-image-@post.Id" type="file" class="form-control"
+                                    accept=".jpg,.jpeg,.png,.gif" />
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-sm btn-primary me-2"
+                                    onclick="submitReply(@post.Id)">返信</button>
+                                <button type="button" class="btn btn-sm btn-secondary"
+                                    onclick="toggleReply(@post.Id)">キャンセル</button>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -230,20 +252,24 @@
 
         async function submitReply(postId) {
             const content = document.getElementById(`reply-content-${postId}`).value;
+            const imageInput = document.getElementById(`reply-image-${postId}`);
+            const imageFile = imageInput?.files[0];
+
             if (!content.trim()) {
                 alert("返信内容を入力してください。");
                 return;
             }
 
+            const formData = new FormData();
+            formData.append("originalPostId", postId);
+            formData.append("content", content);
+            if (imageFile) {
+                formData.append("imageFile", imageFile);
+            }
+
             const res = await fetch("/api/ReplyPost", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    originalPostId: postId,
-                    content: content
-                })
+                body: formData
             });
 
             if (!res.ok) {
@@ -253,6 +279,7 @@
             }
 
             location.reload();
+
         }
     </script>
 

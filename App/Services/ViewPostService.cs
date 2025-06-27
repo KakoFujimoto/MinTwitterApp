@@ -28,7 +28,7 @@ public class ViewPostService
             .Where(x => x.HasValue)
             .Cast<int>()
             .ToList();
- 
+
         var sourceList = await _db.Posts
             .Where(x => sourceIdList.Contains(x.Id))
             .ToListAsync();
@@ -77,9 +77,10 @@ public class ViewPostService
                         : null,
                     SourceImagePath = r.RepostSourceId.HasValue
                         ? _db.Posts.Where(src => src.Id == r.RepostSourceId).Select(src => src.ImagePath).FirstOrDefault()
-                        :null
+                        : null,
+                    ImagePath = r.ImagePath
                 }).ToList()
-            
+
         }).ToList();
 
         return dtos;

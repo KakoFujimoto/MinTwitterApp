@@ -11,5 +11,6 @@ public class ReplyPostDTO
     public int ReplyToPostId { get; set; }
     public string OriginalContent { get; set; } = string.Empty;
     public string originalUserName { get; set; } = string.Empty;
+    public string? ImagePath { get; set; }
 
 }

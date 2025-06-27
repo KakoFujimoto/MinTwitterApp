@@ -27,7 +27,7 @@ public class ReplyPostController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateReply([FromBody] CreateReplyRequest request)
+    public async Task<IActionResult> CreateReply([FromForm] CreateReplyRequest request)
     {
         var loginUserId = _loginUser.GetUserId();
         if (!int.TryParse(loginUserId, out int userId))
@@ -38,7 +38,8 @@ public class ReplyPostController : ControllerBase
         var (errorCode, replyPost) = await _replyPostService.ReplyPostAsync(
             userId,
             request.OriginalPostId,
-            request.Content
+            request.Content,
+            request.ImageFile
         );
 
         if (errorCode == PostErrorCode.None)

@@ -25,7 +25,11 @@ public class CreatePostService
         _dateTimeAccessor = dateTimeAccessor;
     }
 
-    public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> CreateAsync(int userId, string content, IFormFile? imageFile)
+    public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> CreateAsync(
+        int userId,
+        string content,
+        IFormFile? imageFile
+        )
     {
         var contentError = _postErrorService.ValidateContent(content);
         if (contentError != PostErrorCode.None)

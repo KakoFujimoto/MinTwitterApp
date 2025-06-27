@@ -27,7 +27,8 @@ public class ReplyPostService
     public async Task<(PostErrorCode errorCode, ReplyPostDTO? Post)> ReplyPostAsync(
         int userId,
         int originalPostId,
-        string? content
+        string? content,
+        IFormFile? imageFile
     )
     {
         // 元投稿の存在確認
@@ -44,6 +45,18 @@ public class ReplyPostService
             return (contentError, null);
         }
 
+        var imageValidationError = _postErrorService.ValidateImage(imageFile);
+        if (imageValidationError != PostErrorCode.None)
+        {
+            return (imageValidationError, null);
+        }
+
+        string? savedImagePath = null;
+        if (imageFile != null && imageFile.Length > 0)
+        {
+            savedImagePath = await _postErrorService.SaveImageAsync(imageFile);
+        }
+
         // Reply投稿の作成
         var replyPost = new Post
         {
@@ -52,7 +65,8 @@ public class ReplyPostService
             CreatedAt = _dateTimeAccessor.Now,
             UpdatedAt = null,
             IsDeleted = false,
-            RepostSourceId = null
+            RepostSourceId = null,
+            ImagePath = savedImagePath
         };
 
         replyPost.ReplyToPostId = originalPostId;

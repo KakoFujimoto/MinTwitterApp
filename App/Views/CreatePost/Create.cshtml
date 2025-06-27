@@ -89,6 +89,17 @@
                             </button>
                         </form>
 
+                        <!-- リプライボタン -->
+                        <button type="button" class="btn btn-link p-0 ms-2 text-primary" onclick="toggleReply(@post.Id)">
+                            <i class="fas fa-reply"></i>
+                        </button>
+
+                        <!-- リプライフォーム（初期は非表示） -->
+                        <div id="reply-form-@post.Id" style="display: none;" class="mt-2">
+                            <textarea id="reply-content-@post.Id" class="form-control mb-2" rows="2" placeholder="返信内容を入力..."></textarea>
+                            <button class="btn btn-sm btn-primary" onclick="submitReply(@post.Id)">返信</button>
+                            <button class="btn btn-sm btn-secondary" onclick="toggleReply(@post.Id)">キャンセル</button>
+                        </div>
                     </div>
                 </div>
 
@@ -197,6 +208,38 @@
             }
 
             likeCountSpan.textContent = result.likeCount;
+        }
+
+        function toggleReply(postId) {
+            const form = document.getElementById(`reply-form-${postId}`);
+            form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+        }
+
+        async function submitReply(postId) {
+            const content = document.getElementById(`reply-content-${postId}`).value;
+            if (!content.trim()) {
+                alert("返信内容を入力してください。");
+                return;
+            }
+
+            const res = await fetch("/api/ReplyPost", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    originalPostId: postId,
+                    content: content
+                })
+            });
+
+            if (!res.ok) {
+                const result = await res.json().catch(() => ({ error: "返信に失敗しました。" }));
+                alert(result.error || "返信に失敗しました。");
+                return;
+            }
+
+            location.reload();
         }
     </script>
 

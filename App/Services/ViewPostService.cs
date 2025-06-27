@@ -1,7 +1,7 @@
 using MinTwitterApp.Data;
 using MinTwitterApp.DTO;
+using MinTwitterApp.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 
 namespace MinTwitterApp.Services;
 
@@ -18,6 +18,7 @@ public class ViewPostService
     public async Task<List<PostPageDTO>> GetAllPostsAsync(int currentUserId)
     {
         var posts = await _db.Posts
+            .Where(p => !p.IsDeleted && p.ReplyToPostId == null)
             .Include(p => p.User)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
@@ -51,10 +52,33 @@ public class ViewPostService
                 ? sourceList.Where(rp => rp.Id == p.RepostSourceId.Value)
                     .Select(rp => rp.Content).FirstOrDefault()
                 : null,
-            SourceImagePath  = p.RepostSourceId.HasValue
+            SourceImagePath = p.RepostSourceId.HasValue
                 ? sourceList.Where(rp => rp.Id == p.RepostSourceId.Value)
                     .Select(rp => rp.ImagePath).FirstOrDefault()
-                : null
+                : null,
+            Replies = _db.Posts
+                .Where(r => r.ReplyToPostId == p.Id && !r.IsDeleted)
+                .OrderBy(r => r.CreatedAt)
+                .Select(r => new PostPageDTO
+                {
+                    Id = r.Id,
+                    Content = r.Content,
+                    CreatedAt = r.CreatedAt,
+                    UserName = r.User.Name,
+                    UserId = r.UserId,
+                    LikeCount = _db.Likes.Count(l => l.PostId == r.Id),
+                    IsLiked = _db.Likes.Any(l => l.PostId == r.Id && l.UserId == currentUserId),
+                    RepostSourceId = r.RepostSourceId,
+                    SourceUserName = r.RepostSourceId.HasValue
+                        ? _db.Posts.Where(src => src.Id == r.ReplyToPostId).Select(src => src.User.Name).FirstOrDefault()
+                        : null,
+                    SourceContent = r.RepostSourceId.HasValue
+                        ? _db.Posts.Where(src => src.Id == r.RepostSourceId).Select(src => src.Content).FirstOrDefault()
+                        : null,
+                    SourceImagePath = r.RepostSourceId.HasValue
+                        ? _db.Posts.Where(src => src.Id == r.RepostSourceId).Select(src => src.ImagePath).FirstOrDefault()
+                        :null
+                }).ToList()
             
         }).ToList();
 

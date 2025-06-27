@@ -26,4 +26,6 @@ public class PostPageDTO
 
     public string? SourceImagePath { get; set; }
 
+    public List<PostPageDTO>? Replies { get; set; }
+
 }

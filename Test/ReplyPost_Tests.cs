@@ -40,7 +40,7 @@ public class ReplyPost_Tests : IDisposable
         Assert.NotNull(originalPostDto);
 
         var replyService = new ReplyPostService(db, postErrorService, dateTimeAccessorForUnitTest);
-        var (replyError, replyPostDto) = await replyService.ReplyPostAsync(user.Id, originalPostDto!.Id, "返信内容");
+        var (replyError, replyPostDto) = await replyService.ReplyPostAsync(user.Id, originalPostDto!.Id, "返信内容", null);
 
         Assert.Equal(PostErrorCode.None, replyError);
         Assert.NotNull(replyPostDto);
@@ -72,7 +72,7 @@ public class ReplyPost_Tests : IDisposable
         deletedPost.IsDeleted = true;
         db.SaveChanges();
 
-        var result = await replyPostService.ReplyPostAsync(user.Id, deletedPost.Id, "リプライ本文");
+        var result = await replyPostService.ReplyPostAsync(user.Id, deletedPost.Id, "リプライ本文", null);
 
         Assert.Equal(PostErrorCode.NotFound, result.errorCode);
         Assert.Null(result.Post);

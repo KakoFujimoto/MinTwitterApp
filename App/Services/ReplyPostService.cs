@@ -3,34 +3,42 @@ using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace MinTwitterApp.Services;
 
-public class CreatePostService
+public class ReplyPostService
 {
     private readonly ApplicationDbContext _db;
     private readonly PostErrorService _postErrorService;
 
-    private IDateTimeAccessor _dateTimeAccessor;
+    private readonly IDateTimeAccessor _dateTimeAccessor;
 
-    public CreatePostService(
+    public ReplyPostService(
         ApplicationDbContext db,
         PostErrorService postErrorService,
-        IDateTimeAccessor dateTimeAccessor)
+        IDateTimeAccessor dateTimeAccessor
+    )
     {
         _db = db;
         _postErrorService = postErrorService;
         _dateTimeAccessor = dateTimeAccessor;
     }
 
-    public async Task<(PostErrorCode ErrorCode, PostPageDTO? Post)> CreateAsync(
+    public async Task<(PostErrorCode errorCode, ReplyPostDTO? Post)> ReplyPostAsync(
         int userId,
-        string content,
+        int originalPostId,
+        string? content,
         IFormFile? imageFile
         )
     {
+        // 元投稿の存在確認
+        var originalPost = await _db.Posts.FindAsync(originalPostId);
+        if (originalPost == null || originalPost.IsDeleted)
+        {
+            return (PostErrorCode.NotFound, null);
+        }
+
+        // Reply投稿のバリデーション
         var contentError = _postErrorService.ValidateContent(content);
         if (contentError != PostErrorCode.None)
         {
@@ -49,36 +57,37 @@ public class CreatePostService
             savedImagePath = await _postErrorService.SaveImageAsync(imageFile);
         }
 
-        var post = new Post
+        // Reply投稿の作成
+        var replyPost = new Post
         {
             UserId = userId,
-            Content = content,
+            Content = content!,
             CreatedAt = _dateTimeAccessor.Now,
+            UpdatedAt = null,
+            IsDeleted = false,
+            RepostSourceId = null,
             ImagePath = savedImagePath
         };
 
-        _db.Posts.Add(post);
+        replyPost.ReplyToPostId = originalPostId;
+
+        _db.Posts.Add(replyPost);
         await _db.SaveChangesAsync();
 
-        var savedPost = await _db.Posts
-            .Include(p => p.User)
-            .FirstOrDefaultAsync(p => p.Id == post.Id);
+        var user = await _db.Users.FindAsync(userId);
 
-        if (savedPost == null)
+        var dto = new ReplyPostDTO
         {
-            return (PostErrorCode.NotFound, null);
-        }
-
-        var dto = new PostPageDTO
-        {
-            Id = savedPost.Id,
-            Content = savedPost.Content,
-            ImagePath = savedPost.ImagePath,
-            UserId = savedPost.UserId,
-            UserName = savedPost.User.Name,
-            CreatedAt = savedPost.CreatedAt
+            Id = replyPost.Id,
+            Content = replyPost.Content,
+            userId = replyPost.UserId,
+            Username = user?.Name ?? "Unknown",
+            ReplyToPostId = originalPost.Id,
+            OriginalContent = originalPost.Content,
+            originalUserName = originalPost.User?.Name ?? "Unknown"
         };
 
         return (PostErrorCode.None, dto);
+
     }
 }

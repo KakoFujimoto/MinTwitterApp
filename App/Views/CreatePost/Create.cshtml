@@ -39,17 +39,19 @@
                     <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
 
                     <!-- リポストの場合  -->
-                    @if (post.RepostSourceId != null)
-                    {
-                        <div class="alert alert-secondary mb-2">
-                            <small class="text-muted">リポスト元: @post.SourceUserName</small>
-                            <p class="mb-0">@post.SourceContent</p>
-                            @if (post.SourceImagePath != null)
-                            {
-                            <img src="@post.SourceImagePath" class="post-image">
-                            }
-                        </div>
-                    }
+                    @if (post.RepostSourceId != null)
+                    {
+                        <div class="alert alert-secondary mb-2">
+                            <small class="text-muted">リポスト元: @post.SourceUserName</small>
+                            <p>
+                                @if (post.SourceImagePath != null)
+                                {
+                                    <img src="@post.SourceImagePath" class="post-image">
+                                }
+                            </p>
+                            <p class="mb-0">@post.SourceContent</p>
+                        </div>
+                    }
                     else
                     {
                         <!-- 元投稿  -->
@@ -59,7 +61,29 @@
                                 <img src="@post.ImagePath" class="post-image">
                             </a>
                         }
+                        <!-- リプライ  -->
                         <p class="content">@post.Content</p>
+                        @if (post.Replies != null && post.Replies.Any())
+                        {
+                            <div class="mt-2 ps-3 border-start border-2">
+                                @foreach (var reply in post.Replies)
+                                {
+                                    <div class="border rounded p-2 mb-1 bg-light">
+                                        <h6>@reply.UserName</h6>
+                                        <small class="text-muted"> @reply.CreatedAt.ToString("yyyy/MM/dd HH:mm")</small>
+                                        <p>
+                                            @if (!string.IsNullOrEmpty(reply.ImagePath))
+                                            {
+                                                <a href="@reply.ImagePath" target="_blank">
+                                                    <img src="@reply.ImagePath" class="post-image">
+                                                </a>
+                                            }
+                                        </p>
+                                        <p class="mb-0 content">@reply.Content</p>
+                                    </div>
+                                }
+                            </div>
+                        }
                     }
 
                     <!-- カードのフッター  -->
@@ -80,14 +104,41 @@
                                 <i class="fas fa-edit"></i>
                             </button>
                         }
-                        
+
                         <!-- リポストボタン -->
                         <form asp-controller="RePost" asp-action="Create" method="post" class="ms-2">
-                            <input type="hidden" name="originalPostId" value="@post.Id" />
-                            <button type="submit" class="btn btn-link p-0 text-info">
-                                <i class="fas fa-retweet"></i>
-                            </button>
+                            <input type="hidden" name="originalPostId" value="@post.Id" />
+                            <button type="submit" class="btn btn-link p-0 text-info">
+                                <i class="fas fa-retweet"></i>
+                            </button>
                         </form>
+
+                        <!-- リプライボタン -->
+                        <button type="button" class="btn btn-link p-0 ms-2 text-primary" onclick="toggleReply(@post.Id)">
+                            <i class="fas fa-reply"></i>
+                        </button>
+
+                        <!-- リプライフォーム（初期は非表示） -->
+                        <div id="reply-form-@post.Id" style="display: none;" class="mt-2 border p-3 rounded bg-light">
+                            <div class="form-group mb-2">
+                                <label for="reply-content-@post.Id" class="form-label">返信内容</label>
+                                <textarea id="reply-content-@post.Id" class="form-control" rows="3"
+                            placeholder="返信内容を入力してください"></textarea>
+                            </div>
+
+                            <div class="form-group mb-2">
+                                <label for="reply-image-@post.Id" class="form-label">画像をアップロード (※jpg, png, gif)</label>
+                                <input id="reply-image-@post.Id" type="file" class="form-control"
+                                    accept=".jpg,.jpeg,.png,.gif" />
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-sm btn-primary me-2"
+                                    onclick="submitReply(@post.Id)">返信</button>
+                                <button type="button" class="btn btn-sm btn-secondary"
+                                    onclick="toggleReply(@post.Id)">キャンセル</button>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -197,6 +248,43 @@
             }
 
             likeCountSpan.textContent = result.likeCount;
+        }
+
+        function toggleReply(postId) {
+            const form = document.getElementById(`reply-form-${postId}`);
+            form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+        }
+
+        async function submitReply(postId) {
+            const content = document.getElementById(`reply-content-${postId}`).value;
+            const imageInput = document.getElementById(`reply-image-${postId}`);
+            const imageFile = imageInput?.files[0];
+
+            if (!content.trim()) {
+                alert("返信内容を入力してください。");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("originalPostId", postId);
+            formData.append("content", content);
+            if (imageFile) {
+                formData.append("imageFile", imageFile);
+            }
+
+            const res = await fetch("/api/ReplyPost", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!res.ok) {
+                const result = await res.json().catch(() => ({ error: "返信に失敗しました。" }));
+                alert(result.error || "返信に失敗しました。");
+                return;
+            }
+
+            location.reload();
+
         }
     </script>
 

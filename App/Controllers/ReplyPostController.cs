@@ -51,11 +51,11 @@ public class ReplyPostController : ControllerBase
 
         return errorCode switch
         {
-            PostErrorCode.NotFound => NotFound(message),
+            PostErrorCode.NotFound => NotFound(new { error = message }),
             PostErrorCode.ContentEmpty or PostErrorCode.ContentTooLong or
             PostErrorCode.InvalidImageExtension or PostErrorCode.InvalidImageFormat or
-            PostErrorCode.ImageReadError => BadRequest(message),
-            _ => StatusCode(500, message)
+            PostErrorCode.ImageReadError => BadRequest(new { error = message }),
+            _ => StatusCode(500, new { error = message })
         };
     }
 }

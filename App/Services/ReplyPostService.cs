@@ -29,7 +29,7 @@ public class ReplyPostService
         int originalPostId,
         string? content,
         IFormFile? imageFile
-    )
+        )
     {
         // 元投稿の存在確認
         var originalPost = await _db.Posts.FindAsync(originalPostId);

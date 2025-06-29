@@ -74,4 +74,11 @@ public class FollowUserService
             };
         }
     }
+
+    // 自分(followerId)が対象ユーザー(followeeId)をフォローしているかどうかを返す
+    public async Task<bool> IsFollowingAsync(int followerId, int followeeId)
+    {
+        return await _db.Follows
+            .AnyAsync(f => f.FollowerId == followeeId && f.FolloweeId == followeeId);
+    }
 }

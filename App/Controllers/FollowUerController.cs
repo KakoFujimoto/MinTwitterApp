@@ -29,7 +29,7 @@ public class FollowUserController : ControllerBase
         {
             return Unauthorized("ログインユーザーが特定できません。");
         }
-        var result = await FollowUserService.ToggleFollowAsync(userId, request.targetUserId);
+        var result = await _followUserService.ToggleFollowAsync(userId, request.TargetUserId);
         return Ok(result);
     }
 

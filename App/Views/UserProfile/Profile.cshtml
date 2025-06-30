@@ -52,7 +52,9 @@ else
             const followerCountSpan = document.getElementById("followerCount");
 
             // フォロー状態を取得
-            fetch(`/api/FollowUser/IsFollowing/${targetUserId}`)
+            fetch(`/api/FollowUser/IsFollowing/${targetUserId}`,{
+                credentials: 'include'
+            })
                 .then(response => response.json())
                 .then(isFollowing => {
                     updateButton(isFollowing);
@@ -71,6 +73,7 @@ else
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify({ targetUserId: targetUserId })
                 })
                     .then(response => response.json())

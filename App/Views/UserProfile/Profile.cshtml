@@ -8,7 +8,7 @@
 
 <div class="mb-3">
     <p>フォロー中: @Model.Profile.FollowingCount 人</p>
-    <p>フォロワー: @Model.Profile.FollowerCount 人</p>
+    <p>フォロワー: <span id action="followerCount">@Model.Profile.FollowerCount</span> 人</p>
     <p>アカウント作成日: @Model.Profile.CreatedAt.ToString("yyyy/MM/dd")</p>
 
     @if (!Model.IsCurrentUser)
@@ -52,8 +52,8 @@ else
             const followerCountSpan = document.getElementById("followerCount");
 
             // フォロー状態を取得
-            fetch(`api/*FollowUser/IsFollowing/${targetUserId}`)
-                .then(responce => responce.json())
+            fetch(`/api/FollowUser/IsFollowing/${targetUserId}`)
+                .then(response => response.json())
                 .then(isFollowing => {
                     updateButton(isFollowing);
                     followBtn.disabled = false;
@@ -63,41 +63,46 @@ else
                     followBtn.disabled = true;
                 });
 
-            followBtn.addEventListener("click", arguments() => {
+            followBtn.addEventListener("click", () => {
                 followBtn.disabled = true;
+
                 fetch('/api/FollowUser/toggle', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': getAntiForgeryToken()
-                        },
-            body : JSON.stringify({ targetUserId: targetUserId })
-                    })
-            .then(responce => responce.json())
-            .then(data => {
-                if (data.errorCode === 0 /* PostErrorCore.None */) {
-                    updateButton(data.isFollowing);
-                    // フォロワー数を動的に増減
-                    let count = parseInt(followerCountSpan.textContent);
-                    count = data.isFollowing ? count count + 1 : count - 1;
-                    followerCountSpan.textContent = count;
-                } else {
-                    alert("フォロー処理に失敗しました。");
-                }
-                followBtn.disabled = false;
-            })
-            .catch(() => {
-                alert("フォロー処理に失敗しました。");
-                followBtn.disabled = false;
-            });
-        });
-
-        
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ targetUserId: targetUserId })
                 })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.errorCode === 0) {
+                            updateButton(data.isFollowing);
+                            // フォロワー数の更新
+                            let count = parseInt(followerCountSpan.textContent);
+                            count = data.isFollowing ? count + 1 : count - 1;
+                            followerCountSpan.textContent = count;
+                        } else {
+                            alert("フォロー処理に失敗しました。");
+                        }
+                        followBtn.disabled = false;
+                    })
+                    .catch(() => {
+                        alert("フォロー処理に失敗しました。");
+                        followBtn.disabled = false;
+                    });
+            });
 
-            })
-
-
-
+            function updateButton(isFollowing) {
+                if (isFollowing) {
+                    followBtn.textContent = "フォロー解除";
+                    followBtn.classList.remove("btn-primary");
+                    followBtn.classList.add("btn-secondary");
+                } else {
+                    followBtn.textContent = "フォローする";
+                    followBtn.classList.remove("btn-secondary");
+                    followBtn.classList.add("btn-primary");
+                }
+            }
+        });
     </script>
 }

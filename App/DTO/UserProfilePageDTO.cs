@@ -7,4 +7,6 @@ public class UserProfilePageDTO
     public UserProfileDTO Profile { get; set; } = null!;
 
     public List<Post> Posts { get; set; } = new();
+
+    public bool IsCurrentUser { get; set; }
 }

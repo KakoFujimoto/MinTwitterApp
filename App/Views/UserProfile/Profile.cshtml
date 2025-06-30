@@ -10,6 +10,11 @@
     <p>フォロー中: @Model.Profile.FollowingCount 人</p>
     <p>フォロワー: @Model.Profile.FollowerCount 人</p>
     <p>アカウント作成日: @Model.Profile.CreatedAt.ToString("yyyy/MM/dd")</p>
+
+    @if (!Model.IsCurrentUser)
+    {
+        <button id="followBtn" class="btn btn-primary" disabled>読み込み中..</button>
+    }
 </div>
 
 <hr />
@@ -37,4 +42,62 @@
 else
 {
     <p>投稿はまだありません。</p>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const targetUserId = @Model.Profile.UserId;
+            const followBtn = document.getElementById("followBtn");
+            const followerCountSpan = document.getElementById("followerCount");
+
+            // フォロー状態を取得
+            fetch(`api/*FollowUser/IsFollowing/${targetUserId}`)
+                .then(responce => responce.json())
+                .then(isFollowing => {
+                    updateButton(isFollowing);
+                    followBtn.disabled = false;
+                })
+                .catch(() => {
+                    alert("フォロー状態の取得に失敗しました");
+                    followBtn.disabled = true;
+                });
+
+            followBtn.addEventListener("click", arguments() => {
+                followBtn.disabled = true;
+                fetch('/api/FollowUser/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': getAntiForgeryToken()
+                        },
+            body : JSON.stringify({ targetUserId: targetUserId })
+                    })
+            .then(responce => responce.json())
+            .then(data => {
+                if (data.errorCode === 0 /* PostErrorCore.None */) {
+                    updateButton(data.isFollowing);
+                    // フォロワー数を動的に増減
+                    let count = parseInt(followerCountSpan.textContent);
+                    count = data.isFollowing ? count count + 1 : count - 1;
+                    followerCountSpan.textContent = count;
+                } else {
+                    alert("フォロー処理に失敗しました。");
+                }
+                followBtn.disabled = false;
+            })
+            .catch(() => {
+                alert("フォロー処理に失敗しました。");
+                followBtn.disabled = false;
+            });
+        });
+
+        
+                })
+
+            })
+
+
+
+    </script>
 }

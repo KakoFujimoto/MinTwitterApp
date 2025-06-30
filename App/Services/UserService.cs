@@ -62,4 +62,8 @@ public class UserService
         return await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
+    public async Task<User?> GetUserByIdAsync(int userId)
+    {
+        return await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+    }
 }

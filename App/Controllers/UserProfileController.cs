@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
+using MinTwitterApp.Common;
 
 namespace MinTwitterApp.Controllers;
 
@@ -10,12 +11,11 @@ public class UserProfileController : Controller
 {
     private readonly UserProfileService _userProfileService;
 
-    private readonly UserService _userService;
-
-    public UserProfileController(UserProfileService userProfileService, UserService userService)
+    private readonly LoginUser _loginuser;
+    public UserProfileController(UserProfileService userProfileService, LoginUser loginUser)
     {
         _userProfileService = userProfileService;
-        _userService = userService;
+        _loginuser = loginUser;
     }
 
     [HttpGet("{id}")]
@@ -29,10 +29,13 @@ public class UserProfileController : Controller
 
         var posts = await _userProfileService.GetPostByUserAsync(id);
 
+        var loginUserId = int.TryParse(_loginuser.GetUserId(), out int userId) ? userId : -1;
+
         var model = new UserProfilePageDTO
         {
             Profile = profile,
-            Posts = posts
+            Posts = posts,
+            IsCurrentUser = (loginUserId == profile.UserId)
         };
 
         return View("Profile", model);

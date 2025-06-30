@@ -1,0 +1,40 @@
+@model MinTwitterApp.DTO.UserProfilePageDTO
+
+@{
+    ViewData["Title"] = "プロフィール";
+}
+
+<h2>@Model.Profile.Name さんのプロフィール</h2>
+
+<div class="mb-3">
+    <p>フォロー中: @Model.Profile.FollowingCount 人</p>
+    <p>フォロワー: @Model.Profile.FollowerCount 人</p>
+    <p>アカウント作成日: @Model.Profile.CreatedAt.ToString("yyyy/MM/dd")</p>
+</div>
+
+<hr />
+
+<h3>投稿一覧</h3>
+
+@if (Model.Posts.Any())
+{
+    <ul class="list-group">
+        @foreach (var post in Model.Posts)
+        {
+            <li class="list-group-item">
+                <div>
+                    <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
+                    @if (!string.IsNullOrEmpty(post.ImagePath))
+                    {
+                        <img src="@post.ImagePath" class="img-fluid" style="max-width: 300px;" />
+                    }
+                    <p>@post.Content</p>
+                </div>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>投稿はまだありません。</p>
+}

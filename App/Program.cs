@@ -46,6 +46,8 @@ builder.Services.AddSingleton<IDateTimeAccessor, DateTimeAccessor>();
 builder.Services.AddScoped<LikePostService>();
 builder.Services.AddScoped<RePostService>();
 builder.Services.AddScoped<ReplyPostService>();
+builder.Services.AddScoped<FollowUserService>();
+builder.Services.AddScoped<UserProfileService>();
 builder.Services.AddScoped<LoginUser>();
 builder.Services.AddScoped<ImageFormatDetector>();
 

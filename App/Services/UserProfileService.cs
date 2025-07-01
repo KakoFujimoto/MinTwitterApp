@@ -19,25 +19,18 @@ public class UserProfileService
     // プロフィールに表示するユーザーの情報を取得する
     public async Task<UserProfileDTO?> GetUserProfileAsync(int userId)
     {
-        var user = await _db.Users
-            .Include(u => u.Followers)
-            .Include(u => u.Following)
-            .FirstOrDefaultAsync(u => u.Id == userId);
-
-        if (user == null)
-        {
-            return null;
-        }
-
-        return new UserProfileDTO
-        {
-            UserId = user.Id,
-            Name = user.Name,
-            FollowerCount = user.Followers.Count,
-            FollowingCount = user.Following.Count,
-            CreatedAt = user.CreatedAt
-        };
-
+        var userInfo = await _db.Users
+            .Where(u => u.Id == userId)
+            .Select(u => new UserProfileDTO
+            {
+                UserId = u.Id,
+                Name = u.Name,
+                CreatedAt = u.CreatedAt,
+                FollowerCount = _db.Follows.Count(f => f.FolloweeId == u.Id),
+                FollowingCount = _db.Follows.Count(f => f.FollowerId == u.Id)
+            })
+            .FirstOrDefaultAsync();
+        return userInfo;
     }
 
     // 該当ユーザーの投稿一覧を取得する

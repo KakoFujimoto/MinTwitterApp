@@ -31,8 +31,9 @@ public class FollowUserService
         }
 
         // 対象ユーザーが存在するか確認
-        var followwExists = await _db.Users.AnyAsync(u => u.Id == followeeId);
-        if (!followwExists)
+        var followeeExists = await _db.Users.AnyAsync(u => u.Id == followeeId);
+        var followerExists = await _db.Users.AnyAsync(u => u.Id == followerId);
+        if (!followeeExists || !followerExists)
         {
             return new FollowResultDTO
             {

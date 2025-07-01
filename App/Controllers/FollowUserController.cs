@@ -37,7 +37,7 @@ public class FollowUserController : ControllerBase
     public async Task<ActionResult<bool>> IsFollowing(int targetUserId)
     {
         var loginUserId = _loginuser.GetUserId();
-        if (loginUserId == null || int.TryParse(loginUserId, out int userId))
+        if (loginUserId == null || !int.TryParse(loginUserId, out int userId))
         {
             return Unauthorized("ログインユーザーが特定できません。");
         }

@@ -65,7 +65,7 @@
                         }
                         <!-- リプライ  -->
                         <p class="content">@post.Content</p>
-                        @if (post.Replies != null && post.Replies.Any())
+                        @if (post.Replies.Any())
                         {
                             <div class="mt-2 ps-3 border-start border-2">
                                 @foreach (var reply in post.Replies)

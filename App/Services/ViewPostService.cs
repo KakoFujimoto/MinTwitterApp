@@ -20,6 +20,7 @@ public class ViewPostService
         var posts = await _db.Posts
             .Where(p => !p.IsDeleted && p.ReplyToPostId == null)
             .Include(p => p.User)
+            .Include(p => p.Replies)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
@@ -56,8 +57,7 @@ public class ViewPostService
                 ? sourceList.Where(rp => rp.Id == p.RepostSourceId.Value)
                     .Select(rp => rp.ImagePath).FirstOrDefault()
                 : null,
-            Replies = _db.Posts
-                .Where(r => r.ReplyToPostId == p.Id && !r.IsDeleted)
+            Replies = p.Replies
                 .OrderBy(r => r.CreatedAt)
                 .Select(r => new PostPageDTO
                 {

@@ -30,10 +30,7 @@ public class Post
     public int? ReplyToPostId { get; set; }
     public Post? ReplyToPost { get; set; }
 
-    [InverseProperty(nameof(ReplyToPostId))]
+    [InverseProperty("ReplyToPost")]
     public ICollection<Post> Replies { get; set; } = new HashSet<Post>();
-
-    [ForeignKey("ReplyToPost")]
-    public Post? ParentPost { get; set; }
 
 }

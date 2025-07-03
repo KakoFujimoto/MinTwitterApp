@@ -20,29 +20,7 @@
 <hr />
 
 <h3>投稿一覧</h3>
-
-@if (Model.Posts.Any())
-{
-    <ul class="list-group">
-        @foreach (var post in Model.Posts)
-        {
-            <li class="list-group-item">
-                <div>
-                    <h6>@post.CreatedAt.ToString("yyyy/MM/dd HH:mm")</h6>
-                    @if (!string.IsNullOrEmpty(post.ImagePath))
-                    {
-                        <img src="@post.ImagePath" class="img-fluid" style="max-width: 300px;" />
-                    }
-                    <p>@post.Content</p>
-                </div>
-            </li>
-        }
-    </ul>
-}
-else
-{
-    <p>投稿はまだありません。</p>
-}
+@await Component.InvokeAsync("PostList", new { posts = Model.Posts, currentUserId = Model.CurrentUserId})
 
 @section Scripts {
     <script>
@@ -52,7 +30,7 @@ else
             const followerCountSpan = document.getElementById("followerCount");
 
             // フォロー状態を取得
-            fetch(`/api/FollowUser/IsFollowing/${targetUserId}`,{
+            fetch(`/api/FollowUser/IsFollowing/${targetUserId}`, {
                 credentials: 'include'
             })
                 .then(response => response.json())

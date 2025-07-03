@@ -21,21 +21,22 @@ public class UserProfileController : Controller
     [HttpGet("{id}")]
     public async Task<IActionResult> Index(int id)
     {
+        var loginUserId = int.TryParse(_loginuser.GetUserId(), out int userId) ? userId : -1;
+
         var profile = await _userProfileService.GetUserProfileAsync(id);
         if (profile == null)
         {
             return NotFound();
         }
 
-        var posts = await _userProfileService.GetPostByUserAsync(id);
-
-        var loginUserId = int.TryParse(_loginuser.GetUserId(), out int userId) ? userId : -1;
+        var posts = await _userProfileService.GetPostDtoByUserAsync(id, loginUserId);
 
         var model = new UserProfilePageDTO
         {
             Profile = profile,
             Posts = posts,
-            IsCurrentUser = (loginUserId == profile.UserId)
+            IsCurrentUser = (loginUserId == profile.UserId),
+            CurrentUserId = loginUserId
         };
 
         return View("Profile", model);

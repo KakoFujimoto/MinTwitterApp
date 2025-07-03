@@ -33,4 +33,6 @@ public class Post
     [InverseProperty("ReplyToPost")]
     public ICollection<Post> Replies { get; set; } = new HashSet<Post>();
 
+    public ICollection<Like> Likes { get; set; } = new HashSet<Like>();
+
 }

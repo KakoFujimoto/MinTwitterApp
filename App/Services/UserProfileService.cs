@@ -34,11 +34,25 @@ public class UserProfileService
     }
 
     // 該当ユーザーの投稿一覧を取得する
-    public async Task<List<Post>> GetPostByUserAsync(int userId)
+    public async Task<List<PostPageDTO>> GetPostDtoByUserAsync(int userId, int CurrentUserId)
     {
         return await _db.Posts
             .Where(p => p.UserId == userId)
+            .Include(p => p.User)
+            .Include(p => p.Likes)
             .OrderByDescending(p => p.CreatedAt)
+            .Select(p => new PostPageDTO
+            {
+                Id = p.Id,
+                Content = p.Content,
+                ImagePath = p.ImagePath,
+                CreatedAt = p.CreatedAt,
+                UserId = p.UserId,
+                UserName = p.User.Name,
+                LikeCount = p.Likes.Count(),
+                IsLiked = p.Likes.Any(l => l.UserId == CurrentUserId),
+                Replies = new List<PostPageDTO>()
+            })
             .ToListAsync();
     }
 

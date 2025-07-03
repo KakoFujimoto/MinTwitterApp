@@ -26,8 +26,8 @@ public class UserProfileService
                 UserId = u.Id,
                 Name = u.Name,
                 CreatedAt = u.CreatedAt,
-                FollowerCount = _db.Follows.Count(f => f.FolloweeId == u.Id),
-                FollowingCount = _db.Follows.Count(f => f.FollowerId == u.Id)
+                FollowerCount = u.Followers.Count,
+                FollowingCount = u.Following.Count
             })
             .FirstOrDefaultAsync();
         return userInfo;

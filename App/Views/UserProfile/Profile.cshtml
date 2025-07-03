@@ -8,7 +8,7 @@
 
 <div class="mb-3">
     <p>フォロー中: @Model.Profile.FollowingCount 人</p>
-    <p>フォロワー: <span id action="followerCount">@Model.Profile.FollowerCount</span> 人</p>
+    <p>フォロワー: <span id="followerCount">@Model.Profile.FollowerCount</span> 人</p>
     <p>アカウント作成日: @Model.Profile.CreatedAt.ToString("yyyy/MM/dd")</p>
 
     @if (!Model.IsCurrentUser)
@@ -69,7 +69,8 @@
                         }
                         followBtn.disabled = false;
                     })
-                    .catch(() => {
+                    .catch((error) => {
+                        console.error("フォロー処理中にエラーが発生", error);
                         alert("フォロー処理に失敗しました。");
                         followBtn.disabled = false;
                     });

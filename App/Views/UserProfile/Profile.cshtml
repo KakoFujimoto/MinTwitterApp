@@ -29,6 +29,8 @@
             const followBtn = document.getElementById("followBtn");
             const followerCountSpan = document.getElementById("followerCount");
 
+            if (!followBtn) return;
+
             // フォロー状態を取得
             fetch(`/api/FollowUser/IsFollowing/${targetUserId}`, {
                 credentials: 'include'

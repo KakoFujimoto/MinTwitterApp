@@ -1,0 +1,25 @@
+@model List<MinTwitterApp.DTO.FollowRelationshipDTO>
+
+@{
+    ViewData["Title"] = "フォロー中一覧";
+}
+
+<h2>フォロー中のユーザー一覧</h2>
+
+@if (Model.Count == 0)
+{
+    <p>フォロー中のユーザーはいません。</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var user in Model)
+        {
+            <li class="list-group-item">
+                <a asp-controller="User" asp-action="Profile" asp-route-id="@user.UserId">
+                    @user.Name
+                </a>
+            </li>
+        }
+    </ul>
+}

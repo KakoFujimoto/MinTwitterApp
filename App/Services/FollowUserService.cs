@@ -4,6 +4,8 @@ using MinTwitterApp.DTO;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.Common;
+using MinTwitterApp.Controllers;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace MinTwitterApp.Services;
 
@@ -83,4 +85,29 @@ public class FollowUserService
             .AnyAsync(f => f.FollowerId == followerId && f.FolloweeId == followeeId);
     }
 
+    // ユーザーがフォローしている人の一覧を返す
+    public async Task<List<FollowRelationshipDTO>> GetFollowingUserAsync(int userId)
+    {
+        return await _db.Follows
+            .Where(f => f.FollowerId == userId)
+            .Select(f => new FollowRelationshipDTO
+            {
+                UserId = f.Followee.Id,
+                Name = f.Followee.Name
+            })
+            .ToListAsync();
+    }
+
+    // ユーザーがフォローされている人の一覧を返す
+    public async Task<List<FollowRelationshipDTO>> GetFollowerUserAsync(int userId)
+    {
+        return await _db.Follows
+            .Where(f => f.FolloweeId == userId)
+            .Select(f => new FollowRelationshipDTO
+            {
+                UserId = f.FollowerId,
+                Name = f.Follower.Name,
+            })
+            .ToListAsync();
+    }
 }

@@ -7,8 +7,16 @@
 <h2>@Model.Profile.Name さんのプロフィール</h2>
 
 <div class="mb-3">
-    <p>フォロー中: @Model.Profile.FollowingCount 人</p>
-    <p>フォロワー: <span id="followerCount">@Model.Profile.FollowerCount</span> 人</p>
+    <p>
+        <a asp-controller="FollowRelationship" asp-action="Following" asp-route-id="@Model.Profile.UserId">
+            フォロー中: @Model.Profile.FollowingCount 人
+        </a>
+    </p>
+    <p>
+        <a asp-controller="FollowRelationship" asp-action="Followers" asp-route-id="@Model.Profile.UserId">
+            フォロワー: <span id="followerCount">@Model.Profile.FollowerCount</span> 人
+        </a>
+    </p>
     <p>アカウント作成日: @Model.Profile.CreatedAt.ToString("yyyy/MM/dd")</p>
 
     @if (!Model.IsCurrentUser)

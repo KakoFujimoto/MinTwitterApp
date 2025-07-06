@@ -18,7 +18,7 @@ public class ViewPostService
     public async Task<List<PostPageDTO>> GetAllPostsAsync(int currentUserId)
     {
         var posts = await _db.Posts
-            .Where(p => !p.IsDeleted && p.ReplyToPostId == null)
+            .Where(p => !p.IsDeleted)
             .Include(p => p.User)
             .Include(p => p.Replies)
             .OrderByDescending(p => p.CreatedAt)

@@ -18,7 +18,7 @@ public class ViewPostService
     public async Task<List<PostPageDTO>> GetAllPostsAsync(int currentUserId)
     {
         var posts = await _db.Posts
-            .Where(p => !p.IsDeleted && p.ReplyToPostId == null)
+            .Where(p => !p.IsDeleted)
             .Include(p => p.User)
             .Include(p => p.Replies)
             .OrderByDescending(p => p.CreatedAt)
@@ -57,6 +57,7 @@ public class ViewPostService
                 ? sourceList.Where(rp => rp.Id == p.RepostSourceId.Value)
                     .Select(rp => rp.ImagePath).FirstOrDefault()
                 : null,
+            ReplyToPostId = p.ReplyToPostId,
             Replies = p.Replies
                 .OrderBy(r => r.CreatedAt)
                 .Select(r => new PostPageDTO
@@ -78,7 +79,8 @@ public class ViewPostService
                     SourceImagePath = r.RepostSourceId.HasValue
                         ? _db.Posts.Where(src => src.Id == r.RepostSourceId).Select(src => src.ImagePath).FirstOrDefault()
                         : null,
-                    ImagePath = r.ImagePath
+                    ImagePath = r.ImagePath,
+                    ReplyToPostId = r.ReplyToPostId
                 }).ToList()
 
         }).ToList();

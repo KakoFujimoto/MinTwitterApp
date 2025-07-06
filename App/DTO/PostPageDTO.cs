@@ -26,5 +26,7 @@ public class PostPageDTO
 
     public string? SourceImagePath { get; set; }
 
+    public int? ReplyToPostId { get; set; }
+
     public List<PostPageDTO> Replies { get; set; } = new();
 }

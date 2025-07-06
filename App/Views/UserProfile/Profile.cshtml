@@ -97,4 +97,124 @@
             }
         });
     </script>
+
+    <script>
+        function toggleEdit(postId) {
+            const display = document.getElementById(`display-${postId}`);
+            const edit = document.getElementById(`edit-${postId}`);
+            const isHidden = edit.style.display === 'none';
+
+            display.style.display = isHidden ? 'none' : 'block';
+            edit.style.display = isHidden ? 'block' : 'none';
+        }
+
+        async function saveEdit(postId) {
+            const content = document.getElementById(`edit-content-${postId}`).value;
+            const imageFile = document.getElementById(`edit-image-${postId}`).files[0];
+            const deleteImage = document.getElementById(`delete-image-${postId}`).checked;
+
+            const formData = new FormData();
+            formData.append("Content", content);
+            if (imageFile) formData.append("ImageFile", imageFile);
+            formData.append("DeleteImage", deleteImage);
+
+            const res = await fetch(`/api/EditPost/${postId}`, {
+                method: 'PUT',
+                body: formData
+            });
+
+            let result;
+            try {
+                result = await res.json();
+            } catch (e) {
+                alert('サーバーエラーが発生しました。');
+                return;
+            }
+
+            if (res.ok) {
+                location.reload();
+            } else {
+                alert(result.error || '編集に失敗しました。');
+            }
+        }
+
+        async function deletePost(postId) {
+            if (!confirm('本当に削除しますか？')) return;
+
+            const res = await fetch(`/api/DeletePost/${postId}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                document.getElementById(`post-${postId}`).remove();
+            } else {
+                alert('削除に失敗しました。');
+            }
+        }
+        async function toggleLike(postId) {
+            const userId = document.querySelector(`#user-id-${postId}`)?.dataset.userId;
+
+
+            const res = await fetch("/api/Like/toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ postId: postId })
+            });
+
+            if (!res.ok) {
+                alert("いいねに失敗しました。");
+                return;
+            }
+
+            const result = await res.json();
+
+            const heartIcon = document.getElementById(`heart-icon-${postId}`);
+            const likeCountSpan = document.getElementById(`like-count-${postId}`);
+
+            if (result.isLiked) {
+                heartIcon.classList.add("text-danger");
+            } else {
+                heartIcon.classList.remove("text-danger");
+            }
+
+            likeCountSpan.textContent = result.likeCount;
+        }
+
+        function toggleReply(postId) {
+            const form = document.getElementById(`reply-form-${postId}`);
+            form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+        }
+
+        async function submitReply(postId) {
+            const content = document.getElementById(`reply-content-${postId}`).value;
+            const imageInput = document.getElementById(`reply-image-${postId}`);
+            const imageFile = imageInput?.files[0];
+
+            if (!content.trim()) {
+                alert("返信内容を入力してください。");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("originalPostId", postId);
+            formData.append("content", content);
+            if (imageFile) {
+                formData.append("imageFile", imageFile);
+            }
+
+            const res = await fetch("/api/ReplyPost", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!res.ok) {
+                const result = await res.json().catch(() => ({ error: "返信に失敗しました。" }));
+                alert(result.error || "返信に失敗しました。");
+                return;
+            }
+
+            location.reload();
+
+        }
+    </script>
 }

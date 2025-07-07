@@ -16,7 +16,7 @@ else
         @foreach (var user in Model)
         {
             <li class="list-group-item">
-                <a asp-controller="User" asp-action="Profile" asp-route-id="@user.UserId">
+                <a asp-controller="UserProfile" asp-action="Index" asp-route-id="@user.UserId">
                     @user.Name
                 </a>
             </li>

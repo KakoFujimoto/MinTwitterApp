@@ -20,7 +20,7 @@ public class PostPageDTO
 
     public int? RepostSourceId { get; set; }
 
-    public int SourceUserId { get; set; }
+    public int? SourceUserId { get; set; }
 
     public string? SourceUserName { get; set; }
 

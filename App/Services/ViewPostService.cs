@@ -45,6 +45,9 @@ public class ViewPostService
             LikeCount = _db.Likes.Count(l => l.PostId == p.Id),
             IsLiked = _db.Likes.Any(l => l.PostId == p.Id && l.UserId == currentUserId),
             RepostSourceId = p.RepostSourceId,
+            SourceUserId = p.RepostSourceId.HasValue
+                ? _db.Posts.Where(src => src.Id == p.RepostSourceId).Select(src => src.User.Id).FirstOrDefault()
+                : null,
             SourceUserName = p.RepostSourceId.HasValue
                 ? sourceList.Where(rp => rp.Id == p.RepostSourceId.Value)
                     .Select(rp => rp.User.Name).FirstOrDefault()

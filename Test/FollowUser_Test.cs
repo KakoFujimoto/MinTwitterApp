@@ -2,6 +2,8 @@ using MinTwitterApp.Data;
 using MinTwitterApp.Services;
 using MinTwitterApp.Models;
 using MinTwitterApp.Tests.Common;
+using Microsoft.EntityFrameworkCore;
+using MinTwitterApp.Enums;
 
 
 namespace MinTwitterApp.Tests;
@@ -43,6 +45,37 @@ public class FollowUser_Tests : IDisposable
 
         var thirdResult = await followService.ToggleFollowAsync(userA.Id, userB.Id);
         Assert.True(thirdResult.IsFollowing);
+
+    }
+
+    [Fact]
+    public async Task FollowBackUser_Ok_Test()
+    {
+        using var transaction = db.Database.BeginTransaction();
+
+        var followUserService = new FollowUserService(db, dateTimeAccessorForUnitTest);
+
+        var userA = User.Create(dateTimeAccessorForUnitTest, "フォロワー", "follwer@test.com", "hashedPassword");
+        var userB = User.Create(dateTimeAccessorForUnitTest, "フォロイー", "follwee@test.com", "hashedPassword");
+        db.Users.AddRange(userA, userB);
+        await db.SaveChangesAsync();
+
+        var follow = new Follow
+        {
+            FollowerId = userB.Id,
+            FolloweeId = userA.Id,
+            CreatedAt = dateTimeAccessorForUnitTest.Now
+        };
+        db.Follows.Add(follow);
+        await db.SaveChangesAsync();
+
+        var result = await followUserService.FollowBackAsync(userA.Id, userB.Id);
+
+        var followBackExists = await db.Follows.AnyAsync(f => f.FollowerId == userA.Id && f.FolloweeId == userB.Id);
+
+        Assert.True(result.IsFollowing);
+        Assert.Equal(PostErrorCode.None, result.ErrorCode);
+        Assert.True(followBackExists);
 
     }
 

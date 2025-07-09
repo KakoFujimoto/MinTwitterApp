@@ -4,8 +4,6 @@ using MinTwitterApp.DTO;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Models;
 using MinTwitterApp.Common;
-using MinTwitterApp.Controllers;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 
 namespace MinTwitterApp.Services;
 
@@ -20,6 +18,7 @@ public class FollowUserService
         _dateTimeAccessor = dateTimeAccessor;
     }
 
+    // フォロー処理
     public async Task<FollowResultDTO> ToggleFollowAsync(int followerId, int followeeId)
     {
         // 自分自身をフォローしようとした場合は無効
@@ -109,5 +108,49 @@ public class FollowUserService
                 Name = f.Follower.Name,
             })
             .ToListAsync();
+    }
+
+    // フォローバック処理
+    public async Task<FollowResultDTO> FollowBackAsync(int currentUserId, int targetUserId)
+    {
+        var isFollowBackTarget = await _db.Follows
+            .AnyAsync(f => f.FollowerId == targetUserId && f.FolloweeId == currentUserId);
+
+        if (!isFollowBackTarget)
+        {
+            return new FollowResultDTO
+            {
+                IsFollowing = false,
+                ErrorCode = PostErrorCode.InvalidOperation
+            };
+        }
+
+        var alreadyFollowing = await _db.Follows
+            .AnyAsync(f => f.FolloweeId == targetUserId && f.FollowerId == currentUserId);
+
+        if (alreadyFollowing)
+        {
+            return new FollowResultDTO
+            {
+                IsFollowing = true,
+                ErrorCode = PostErrorCode.None
+            };
+        }
+
+        var follow = new Follow
+        {
+            FollowerId = currentUserId,
+            FolloweeId = targetUserId,
+            CreatedAt = _dateTimeAccessor.Now
+        };
+        _db.Follows.Add(follow);
+        await _db.SaveChangesAsync();
+
+        return new FollowResultDTO
+        {
+            IsFollowing = true,
+            ErrorCode = PostErrorCode.None
+        };
+
     }
 }

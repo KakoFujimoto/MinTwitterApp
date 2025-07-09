@@ -45,4 +45,17 @@ public class FollowUserController : ControllerBase
         var IsFollowing = await _followUserService.IsFollowingAsync(userId, targetUserId);
         return Ok(IsFollowing);
     }
+
+    [HttpPost("follow-back")]
+    public async Task<ActionResult<FollowResultDTO>> FollowBack([FromBody] FollowBackRequest request)
+    {
+        var loginUserId = _loginuser.GetUserId();
+        if (loginUserId == null || !int.TryParse(loginUserId, out int userId))
+        {
+            return Unauthorized("ログインユーザーが特定できません。");
+        }
+
+        var result = await _followUserService.FollowBackAsync(userId, request.TargetUserId);
+        return Ok(result);
+    }
 }

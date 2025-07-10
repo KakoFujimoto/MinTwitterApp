@@ -3,11 +3,13 @@ using MinTwitterApp.Services;
 using MinTwitterApp.DTO;
 using Microsoft.AspNetCore.Authorization;
 using MinTwitterApp.Common;
+using MinTwitterApp.Filters;
 
 namespace MinTwitterApp.Controllers;
 
 [ApiController]
 [Authorize]
+[UnauthorizedExceptionFilter]
 [Route("api/[controller]")]
 public class FollowUserController : ControllerBase
 {
@@ -24,11 +26,9 @@ public class FollowUserController : ControllerBase
     [HttpPost("toggle")]
     public async Task<ActionResult<FollowResultDTO>> ToggleFollow([FromBody] ToggleFollowRequest request)
     {
-        var loginUserId = _loginuser.GetUserId();
-        if (loginUserId == null || !int.TryParse(loginUserId, out int userId))
-        {
-            return Unauthorized("ログインユーザーが特定できません。");
-        }
+
+        int userId = _loginuser.GetUserId();
+
         var result = await _followUserService.ToggleFollowAsync(userId, request.TargetUserId);
         return Ok(result);
     }
@@ -36,24 +36,18 @@ public class FollowUserController : ControllerBase
     [HttpGet("IsFollowing/{TargetUserId}")]
     public async Task<ActionResult<bool>> IsFollowing(int targetUserId)
     {
-        var loginUserId = _loginuser.GetUserId();
-        if (loginUserId == null || !int.TryParse(loginUserId, out int userId))
-        {
-            return Unauthorized("ログインユーザーが特定できません。");
-        }
 
-        var IsFollowing = await _followUserService.IsFollowingAsync(userId, targetUserId);
+        int? userId = _loginuser.GetUserId();
+
+        var IsFollowing = await _followUserService.IsFollowingAsync(userId.Value, targetUserId);
         return Ok(IsFollowing);
     }
 
     [HttpPost("follow-back")]
     public async Task<ActionResult<FollowResultDTO>> FollowBack([FromBody] FollowBackRequest request)
     {
-        var loginUserId = _loginuser.GetUserId();
-        if (loginUserId == null || !int.TryParse(loginUserId, out int userId))
-        {
-            return Unauthorized("ログインユーザーが特定できません。");
-        }
+
+        int userId = _loginuser.GetUserId();
 
         var result = await _followUserService.FollowBackAsync(userId, request.TargetUserId);
         return Ok(result);

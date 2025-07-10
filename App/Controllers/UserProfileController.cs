@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
-using MinTwitterApp.Models;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
+using MinTwitterApp.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MinTwitterApp.Controllers;
 
+[Authorize]
+[UnauthorizedExceptionFilter]
 [Route("User")]
 public class UserProfileController : Controller
 {
@@ -21,7 +24,7 @@ public class UserProfileController : Controller
     [HttpGet("{id}")]
     public async Task<IActionResult> Index(int id)
     {
-        var loginUserId = int.TryParse(_loginuser.GetUserId(), out int userId) ? userId : -1;
+        var loginUserId = _loginuser.GetUserId();
 
         var profile = await _userProfileService.GetUserProfileAsync(id);
         if (profile == null)
@@ -35,7 +38,7 @@ public class UserProfileController : Controller
         {
             Profile = profile,
             Posts = posts,
-            IsCurrentUser = (loginUserId == profile.UserId),
+            IsCurrentUser = loginUserId == profile.UserId,
             CurrentUserId = loginUserId
         };
 

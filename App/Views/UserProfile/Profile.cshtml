@@ -21,7 +21,7 @@
 
     @if (!Model.IsCurrentUser)
     {
-        <button id="followBtn" class="btn btn-primary" disabled>読み込み中..</button>
+        <button class="btn btn-primary followBtn" data-user-id="@Model.Profile.UserId" disabled>読み込み中..</button>
     }
 </div>
 
@@ -33,11 +33,11 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const targetUserId = @Model.Profile.UserId;
-            const followBtn = document.getElementById("followBtn");
+            const buttons = document.querySelector(".followBtn");
+            const targetUserId = buttons.dataset.userId;
             const followerCountSpan = document.getElementById("followerCount");
 
-            if (!followBtn) return;
+            if (!buttons) return;
 
             // フォロー状態を取得
             fetch(`/api/FollowUser/IsFollowing/${targetUserId}`, {
@@ -46,15 +46,15 @@
                 .then(response => response.json())
                 .then(isFollowing => {
                     updateButton(isFollowing);
-                    followBtn.disabled = false;
+                    buttons.disabled = false;
                 })
                 .catch(() => {
                     alert("フォロー状態の取得に失敗しました");
-                    followBtn.disabled = true;
+                    buttons.disabled = true;
                 });
 
-            followBtn.addEventListener("click", () => {
-                followBtn.disabled = true;
+            buttons.addEventListener("click", () => {
+                buttons.disabled = true;
 
                 fetch('/api/FollowUser/toggle', {
                     method: 'POST',
@@ -76,24 +76,24 @@
                         } else {
                             alert("フォロー処理に失敗しました。");
                         }
-                        followBtn.disabled = false;
+                        buttons.disabled = false;
                     })
                     .catch((error) => {
                         console.error("フォロー処理中にエラーが発生", error);
                         alert("フォロー処理に失敗しました。");
-                        followBtn.disabled = false;
+                        buttons.disabled = false;
                     });
             });
 
             function updateButton(isFollowing) {
                 if (isFollowing) {
-                    followBtn.textContent = "フォロー解除";
-                    followBtn.classList.remove("btn-primary");
-                    followBtn.classList.add("btn-secondary");
+                    buttons.textContent = "フォロー解除";
+                    buttons.classList.remove("btn-primary");
+                    buttons.classList.add("btn-secondary");
                 } else {
-                    followBtn.textContent = "フォローする";
-                    followBtn.classList.remove("btn-secondary");
-                    followBtn.classList.add("btn-primary");
+                    buttons.textContent = "フォローする";
+                    buttons.classList.remove("btn-secondary");
+                    buttons.classList.add("btn-primary");
                 }
             }
         });

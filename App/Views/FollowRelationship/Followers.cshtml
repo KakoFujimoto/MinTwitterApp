@@ -1,4 +1,4 @@
-@model List<MinTwitterApp.DTO.FollowRelationshipDTO>
+@model MinTwitterApp.DTO.FollowersPageDTO
 
 @{
     ViewData["Title"] = "フォロワー一覧";
@@ -6,20 +6,23 @@
 
 <h2>フォロワー一覧</h2>
 
-@if (Model.Count == 0)
+@if (Model.Followers.Count == 0)
 {
     <p>フォロワーはいません。</p>
 }
 else
 {
     <ul class="list-group">
-        @foreach (var user in Model)
+        @foreach (var user in Model.Followers)
         {
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <a asp-controller="UserProfile" asp-action="Index" asp-route-id="@user.UserId">
                     @user.Name
                 </a>
-                <button class="btn btn-primary followBtn" data-user-id="@user.UserId" disabled>読み込み中..</button>
+                @if (user.UserId != Model.CurrentUserId)
+                {
+                    <button class="btn btn-primary followBtn" data-user-id="@user.UserId" disabled>読み込み中..</button>
+                }
             </li>
         }
     </ul>

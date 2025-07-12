@@ -1,5 +1,3 @@
-using MinTwitterApp.Models;
-
 namespace MinTwitterApp.DTO;
 
 public class UserProfilePageDTO

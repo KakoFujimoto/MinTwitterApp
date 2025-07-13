@@ -34,10 +34,10 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const buttons = document.querySelector(".followBtn");
+            if (!buttons) return;
             const targetUserId = buttons.dataset.userId;
             const followerCountSpan = document.getElementById("followerCount");
 
-            if (!buttons) return;
 
             // フォロー状態を取得
             fetch(`/api/FollowUser/IsFollowing/${targetUserId}`, {

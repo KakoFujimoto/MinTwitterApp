@@ -18,8 +18,17 @@ public class FollowRelationshipController : Controller
     public async Task<IActionResult> Following(int id)
     {
         var followingUsers = await _followUserService.GetFollowingUserAsync(id);
-        return View(followingUsers);
+        var CurrentUserId = _loginUser.GetUserId();
+
+        var model = new FollowingsPageDTO
+        {
+            CurrentUserId = CurrentUserId,
+            Following = followingUsers
+        };
+
+        return View(model);
     }
+
 
     public async Task<IActionResult> Followers(int id)
     {

@@ -1,4 +1,4 @@
-@model List<MinTwitterApp.DTO.FollowRelationshipDTO>
+@model MinTwitterApp.DTO.FollowingsPageDTO
 
 @{
     ViewData["Title"] = "フォロー中一覧";
@@ -6,20 +6,90 @@
 
 <h2>フォロー中のユーザー一覧</h2>
 
-@if (Model.Count == 0)
+@if (Model.Following.Count == 0)
 {
     <p>フォロー中のユーザーはいません。</p>
 }
 else
 {
     <ul class="list-group">
-        @foreach (var user in Model)
+        @foreach (var user in Model.Following)
         {
-            <li class="list-group-item">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
                 <a asp-controller="UserProfile" asp-action="Index" asp-route-id="@user.UserId">
                     @user.Name
                 </a>
+                @if (user.UserId != Model.CurrentUserId)
+                {
+                    <button class="btn btn-primary followBtn" data-user-id="@user.UserId" disabled>読み込み中..</button>
+                }
             </li>
         }
     </ul>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const buttons = document.querySelectorAll(".followBtn");
+
+            buttons.forEach(button => {
+                const targetUserId = button.dataset.userId;
+
+                // フォロー状態を取得
+                fetch(`/api/FollowUser/IsFollowing/${targetUserId}`, {
+                    credentials: 'include'
+                })
+                    .then(response => response.json())
+                    .then(isFollowing => {
+                        updateButton(button, isFollowing);
+                        button.disabled = false;
+                    })
+                    .catch(() => {
+                        alert("フォロー状態の取得に失敗しました");
+                        button.disabled = true;
+                    });
+
+                button.addEventListener("click", () => {
+                    button.disabled = true;
+
+                    fetch('/api/FollowUser/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ targetUserId: targetUserId })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.errorCode === 0) {
+                                updateButton(button, data.isFollowing);
+                                alert(data.isFollowing ? "フォローしました。" : "フォロー解除しました。");
+                            } else {
+                                alert("フォロー処理に失敗しました。");
+                            }
+                            button.disabled = false;
+                        })
+                        .catch(error => {
+                            console.error("フォロー処理中にエラーが発生", error);
+                            alert("フォロー処理に失敗しました。");
+                            button.disabled = false;
+                        });
+                });
+            });
+
+            function updateButton(button, isFollowing) {
+                if (isFollowing) {
+                    button.textContent = "フォロー解除";
+                    button.classList.remove("btn-primary");
+                    button.classList.add("btn-secondary");
+                } else {
+                    button.textContent = "フォローする";
+                    button.classList.remove("btn-secondary");
+                    button.classList.add("btn-primary");
+                }
+            }
+        });
+    </script>
 }

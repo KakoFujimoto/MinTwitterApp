@@ -12,11 +12,14 @@ namespace MinTwitterApp.Controllers;
 [Route("User")]
 public class UserProfileController : Controller
 {
+    private readonly ViewPostService _viewPostService;
+
     private readonly UserProfileService _userProfileService;
 
     private readonly LoginUser _loginuser;
-    public UserProfileController(UserProfileService userProfileService, LoginUser loginUser)
+    public UserProfileController(ViewPostService viewPostService, UserProfileService userProfileService, LoginUser loginUser)
     {
+        _viewPostService = viewPostService;
         _userProfileService = userProfileService;
         _loginuser = loginUser;
     }
@@ -24,7 +27,7 @@ public class UserProfileController : Controller
     [HttpGet("{id}")]
     public async Task<IActionResult> Index(int id)
     {
-        var loginUserId = _loginuser.GetUserId();
+        var currentUserId = _loginuser.GetUserId();
 
         var profile = await _userProfileService.GetUserProfileAsync(id);
         if (profile == null)
@@ -32,14 +35,14 @@ public class UserProfileController : Controller
             return NotFound();
         }
 
-        var posts = await _userProfileService.GetPostDtoByUserAsync(id, loginUserId);
+        var posts = await _viewPostService.GetPostsAsync(currentUserId, filterUserId: id);
 
         var model = new UserProfilePageDTO
         {
             Profile = profile,
             Posts = posts,
-            IsCurrentUser = loginUserId == profile.UserId,
-            CurrentUserId = loginUserId
+            IsCurrentUser = currentUserId == profile.UserId,
+            CurrentUserId = currentUserId
         };
 
         return View("Profile", model);

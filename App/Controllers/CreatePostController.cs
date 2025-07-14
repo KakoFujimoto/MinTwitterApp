@@ -37,7 +37,7 @@ public class CreatePostController : Controller
 
         int currentUserId = _loginUser.GetUserId();
 
-        var posts = await _viewPostService.GetAllPostsAsync(currentUserId);
+        var posts = await _viewPostService.GetPostsAsync(currentUserId);
 
         var dto = new CreatePostDTO
         {
@@ -56,7 +56,7 @@ public class CreatePostController : Controller
         if (!ModelState.IsValid)
         {
             var currentUserId = _loginUser.GetUserId();
-            dto.Posts = await _viewPostService.GetAllPostsAsync(currentUserId);
+            dto.Posts = await _viewPostService.GetPostsAsync(currentUserId);
             return View("Create", dto);
         }
 
@@ -85,7 +85,7 @@ public class CreatePostController : Controller
         if (!ModelState.IsValid)
         {
             int? currentUserId = _loginUser.GetUserId();
-            dto.Posts = await _viewPostService.GetAllPostsAsync(currentUserId.Value);
+            dto.Posts = await _viewPostService.GetPostsAsync(currentUserId.Value);
             return View("Create", dto);
         }
 

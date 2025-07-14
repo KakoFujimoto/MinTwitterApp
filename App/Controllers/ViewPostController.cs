@@ -24,7 +24,7 @@ public class ViewPostController : Controller
     {
         var currentUserId = _loginuser.GetUserId();
 
-        var posts = await _viewPostService.GetAllPostsAsync(currentUserId);
+        var posts = await _viewPostService.GetPostsAsync(currentUserId);
         return View("Index", posts);
     }
 

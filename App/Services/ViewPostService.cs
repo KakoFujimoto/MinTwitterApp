@@ -2,6 +2,7 @@ using MinTwitterApp.Data;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Models;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp.Formats.Qoi;
 
 namespace MinTwitterApp.Services;
 
@@ -15,23 +16,42 @@ public class ViewPostService
     }
 
     // 投稿取得処理にはグローバルクエリフィルターでIsDeletedを表示させていない
-    public async Task<List<PostPageDTO>> GetAllPostsAsync(int currentUserId)
+    public async Task<List<PostPageDTO>> GetPostsAsync(int currentUserId, int? filterUserId = null)
     {
-        var posts = await _db.Posts
-            .Where(p => !p.IsDeleted)
+        var query = _db.Posts
             .Include(p => p.User)
             .Include(p => p.Replies)
+                .ThenInclude(r => r.User)
+            .Where(p => !p.IsDeleted);
+
+        // ユーザーIDで絞る場合(プロフィール画面用)
+        if (filterUserId.HasValue)
+        {
+            query = query.Where(p => p.UserId == filterUserId.Value);
+        }
+
+        var posts = await query
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        var sourceIdList = posts
-            .Select(x => x.RepostSourceId)
-            .Where(x => x.HasValue)
-            .Cast<int>()
+        // Repost元取得
+        var sourceIds = posts
+            .Where(p => p.RepostSourceId.HasValue)
+            .Select(p => p.RepostSourceId!.Value)
             .ToList();
 
-        var sourceList = await _db.Posts
-            .Where(x => sourceIdList.Contains(x.Id))
+        var replySourceIds = posts
+            .SelectMany(p => p.Replies)
+            .Where(r => r.RepostSourceId.HasValue)
+            .Select(r => r.RepostSourceId!.Value)
+            .ToList();
+
+        sourceIds.AddRange(replySourceIds);
+        sourceIds = sourceIds.Distinct().ToList();
+
+        var sourcePosts = await _db.Posts
+            .Where(p => sourceIds.Contains(p.Id))
+            .Include(p => p.User)
             .ToListAsync();
 
         var dtos = posts.Select(p => new PostPageDTO
@@ -49,15 +69,15 @@ public class ViewPostService
                 ? _db.Posts.Where(src => src.Id == p.RepostSourceId).Select(src => src.User.Id).FirstOrDefault()
                 : null,
             SourceUserName = p.RepostSourceId.HasValue
-                ? sourceList.Where(rp => rp.Id == p.RepostSourceId.Value)
+                ? sourcePosts.Where(rp => rp.Id == p.RepostSourceId.Value)
                     .Select(rp => rp.User.Name).FirstOrDefault()
                 : null,
             SourceContent = p.RepostSourceId.HasValue
-                ? sourceList.Where(rp => rp.Id == p.RepostSourceId.Value)
+                ? sourcePosts.Where(rp => rp.Id == p.RepostSourceId.Value)
                     .Select(rp => rp.Content).FirstOrDefault()
                 : null,
             SourceImagePath = p.RepostSourceId.HasValue
-                ? sourceList.Where(rp => rp.Id == p.RepostSourceId.Value)
+                ? sourcePosts.Where(rp => rp.Id == p.RepostSourceId.Value)
                     .Select(rp => rp.ImagePath).FirstOrDefault()
                 : null,
             ReplyToPostId = p.ReplyToPostId,

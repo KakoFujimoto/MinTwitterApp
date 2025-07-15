@@ -1,4 +1,6 @@
+@using MinTwitterApp.Common
 @model MinTwitterApp.DTO.FollowingsPageDTO
+@inject LoginUser CurrentUserId
 
 @{
     ViewData["Title"] = "フォロー中一覧";
@@ -19,7 +21,7 @@ else
                 <a asp-controller="UserProfile" asp-action="Index" asp-route-id="@user.UserId">
                     @user.Name
                 </a>
-                @if (user.UserId != Model.CurrentUserId)
+                @if (user.UserId != CurrentUserId.GetUserId())
                 {
                     <button class="btn btn-primary followBtn" data-user-id="@user.UserId" disabled>読み込み中..</button>
                 }

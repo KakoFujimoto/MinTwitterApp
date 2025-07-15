@@ -35,7 +35,9 @@ else
                             <p>
                                 @if (post.SourceImagePath != null)
                                 {
-                                    <img src="@post.SourceImagePath" class="post-image" />
+                                    <a href="@post.ImagePath" target="_blank">
+                                        <img src="@post.SourceImagePath" class="post-image" />
+                                    </a>
                                 }
                             </p>
                         </div>

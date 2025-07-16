@@ -9,7 +9,6 @@ namespace MinTwitterApp.Controllers;
 
 
 [Authorize]
-[UnauthorizedExceptionFilter]
 public class RePostController : Controller
 {
     private readonly RePostService _rePostService;

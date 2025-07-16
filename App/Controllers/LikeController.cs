@@ -9,7 +9,6 @@ namespace MinTwitterApp.Controllers;
 
 [ApiController]
 [Authorize]
-[UnauthorizedExceptionFilter]
 [Route("api/[controller]")]
 public class LikeController : ControllerBase
 {

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace MinTwitterApp.Controllers;
 
 [Authorize]
-[UnauthorizedExceptionFilter]
 public class CreatePostController : Controller
 {
     private readonly CreatePostService _createPostService;

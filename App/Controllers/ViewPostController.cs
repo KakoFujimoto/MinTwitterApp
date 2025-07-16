@@ -7,7 +7,6 @@ using MinTwitterApp.Filters;
 namespace MinTwitterApp.Controllers;
 
 [Authorize]
-[UnauthorizedExceptionFilter]
 public class ViewPostController : Controller
 {
     private readonly ViewPostService _viewPostService;

@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<MinTwitterApp.Filters.GlobalExceptionFilter>();
+    options.Filters.Add<MinTwitterApp.Filters.UnauthorizedExceptionFilter>();
 });
 
 // builder.Services.Configure<WebEncoderOptions>(options =>

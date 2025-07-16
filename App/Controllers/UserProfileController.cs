@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace MinTwitterApp.Controllers;
 
 [Authorize]
-[UnauthorizedExceptionFilter]
 [Route("User")]
 public class UserProfileController : Controller
 {

@@ -32,4 +32,9 @@ else
 
 @section Scripts {
     <script src="~/js/follow-button.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".followBtn").forEach(setupFollowButton);
+        });
+    </script>
 }

@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ *
+ * @param {HTMLButtonElement} button
+ * @returns
+ */
 function setupFollowButton(button) {
   const targetuserId = button.dataset.userId;
   if (!targetuserId) return;
@@ -51,6 +56,11 @@ function setupFollowButton(button) {
     });
 }
 
+/**
+ *
+ * @param {HTMLButtonElement} button
+ * @param {boolean} isFollowing
+ */
 function updateButton(button, isFollowing) {
   if (isFollowing) {
     button.textContent = "フォロー解除";

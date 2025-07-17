@@ -2,80 +2,43 @@ using MinTwitterApp.Data;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Models;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp.Formats.Qoi;
 
 namespace MinTwitterApp.Services;
 
-public class ViewPostService_
+public class ViewPostService_old
 {
     private readonly ApplicationDbContext _db;
-    private readonly FollowUserService _followUserService;
 
-    public ViewPostService_(ApplicationDbContext db, FollowUserService followUserService)
+    public ViewPostService_old(ApplicationDbContext db)
     {
         _db = db;
-        _followUserService = followUserService;
     }
 
     // 投稿取得処理にはグローバルクエリフィルターでIsDeletedを表示させていない
-    // 共通部分のクエリ
-    private IQueryable<Post> BaseQuery => _db.Posts
+    public async Task<List<PostPageDTO>> GetPostsAsync(int currentUserId, int? filterUserId = null)
+    {
+        var query = _db.Posts
             .Include(p => p.User)
             .Include(p => p.Replies)
-                .ThenInclude(r => r.User);
+                .ThenInclude(r => r.User)
+            .Where(p => !p.IsDeleted);
 
-
-    // フォローしているユーザーの投稿取得(未使用/拡張用)
-    public async Task<List<PostPageDTO>> GetFollowerPostsAsync(int currentUserId, int userId)
-    {
-        var query = BaseQuery;
-
-        var followers = await _followUserService.GetFollowerUserAsync(userId);
-        var followerIds = followers.Select(x => x.UserId).ToList();
-
-        query = query.Where(x => followerIds.Contains(userId));
+        // ユーザーIDで絞る場合(プロフィール画面用)
+        if (filterUserId.HasValue)
+        {
+            query = query.Where(p => p.UserId == filterUserId.Value);
+        }
 
         var posts = await query
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return await MapPostsToDTOsAsync(currentUserId, posts);
-    }
-
-    // 全投稿取得(タイムライン用)
-    public async Task<List<PostPageDTO>> GetPostsAsync(int currentUserId)
-    {
-        var query = BaseQuery;
-
-        var posts = await query
-            .OrderByDescending(p => p.CreatedAt)
-            .ToListAsync();
-
-        return await MapPostsToDTOsAsync(currentUserId, posts);
-    }
-
-
-    // 特定ユーザーの投稿取得(プロフィール画面用)
-    public async Task<List<PostPageDTO>> GetPostsAsync(int currentUserId, int filterUserId)
-    {
-        var query = BaseQuery;
-
-        query = query.Where(p => p.UserId == filterUserId);
-
-        var posts = await query
-            .OrderByDescending(p => p.CreatedAt)
-            .ToListAsync();
-
-        return await MapPostsToDTOsAsync(currentUserId, posts);
-    }
-
-    // - 処理調整必要か
-    public async Task<List<PostPageDTO>> MapPostsToDTOsAsync(int currentUserId, List<Post> posts)
-    {
         // Repost元取得
         var sourceIds = posts
-                .Where(p => p.RepostSourceId.HasValue)
-                .Select(p => p.RepostSourceId!.Value)
-                .ToList();
+            .Where(p => p.RepostSourceId.HasValue)
+            .Select(p => p.RepostSourceId!.Value)
+            .ToList();
 
         var replySourceIds = posts
             .SelectMany(p => p.Replies)

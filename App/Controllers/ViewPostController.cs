@@ -27,6 +27,7 @@ public class ViewPostController : Controller
         return View("Index", posts);
     }
 
+    // 使われていない…
     [HttpGet("ViewPost/User/{userId}")]
     public async Task<IActionResult> ByUser(int userId)
     {

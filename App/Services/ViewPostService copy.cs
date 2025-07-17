@@ -2,40 +2,46 @@ using MinTwitterApp.Data;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Models;
 using Microsoft.EntityFrameworkCore;
-using SixLabors.ImageSharp.Formats.Qoi;
 
 namespace MinTwitterApp.Services;
 
 public class ViewPostService_
 {
     private readonly ApplicationDbContext _db;
+    private readonly FollowUserService _followUserService;
 
-    public ViewPostService_(ApplicationDbContext db)
+    public ViewPostService_(ApplicationDbContext db, FollowUserService followUserService)
     {
         _db = db;
+        _followUserService = followUserService;
     }
 
+    // 投稿取得処理にはグローバルクエリフィルターでIsDeletedを表示させていない
+    // 共通部分のクエリ
     private IQueryable<Post> BaseQuery => _db.Posts
             .Include(p => p.User)
             .Include(p => p.Replies)
                 .ThenInclude(r => r.User);
 
-    // public async Task<List<PostPageDTO>> GetFollowerPostsAsync(int currentUserId, int userId)
-    // {
-    //     var query = BaseQuery;
 
-    //     var followers = GetFollowers(userId).Select(x => x.FollowerId).ToList;
+    // フォローしているユーザーの投稿取得(未使用/拡張用)
+    public async Task<List<PostPageDTO>> GetFollowerPostsAsync(int currentUserId, int userId)
+    {
+        var query = BaseQuery;
 
-    //     query = query.Where(x => followers.Contains(x.UserId));
+        var followers = await _followUserService.GetFollowerUserAsync(userId);
+        var followerIds = followers.Select(x => x.UserId).ToList();
 
+        query = query.Where(x => followerIds.Contains(userId));
 
-    //     var posts = await query
-    //         .OrderByDescending(p => p.CreatedAt)
-    //         .ToListAsync();
+        var posts = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
 
-    //     return SharedFunction(currentUserId, posts);
-    //}
+        return await MapPostsToDTOsAsync(currentUserId, posts);
+    }
 
+    // 全投稿取得(タイムライン用)
     public async Task<List<PostPageDTO>> GetPostsAsync(int currentUserId)
     {
         var query = BaseQuery;
@@ -44,27 +50,26 @@ public class ViewPostService_
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return await SharedFunction(currentUserId, posts);
+        return await MapPostsToDTOsAsync(currentUserId, posts);
     }
 
-    // 投稿取得処理にはグローバルクエリフィルターでIsDeletedを表示させていない
+
+    // 特定ユーザーの投稿取得(プロフィール画面用)
     public async Task<List<PostPageDTO>> GetPostsAsync(int currentUserId, int filterUserId)
     {
         var query = BaseQuery;
 
-        // ユーザーIDで絞る場合(プロフィール画面用)
         query = query.Where(p => p.UserId == filterUserId);
 
         var posts = await query
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return await SharedFunction(currentUserId, posts);
+        return await MapPostsToDTOsAsync(currentUserId, posts);
     }
 
-    // - 名前変える
     // - 処理調整必要か
-    public async Task<List<PostPageDTO>> SharedFunction(int currentUserId, List<Post> posts)
+    public async Task<List<PostPageDTO>> MapPostsToDTOsAsync(int currentUserId, List<Post> posts)
     {
         // Repost元取得
         var sourceIds = posts

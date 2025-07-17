@@ -10,13 +10,17 @@ public class LoginUser
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public string GetUserId()
+    public int GetUserId()
     {
         var user = _httpContextAccessor.HttpContext?.User;
         var loginUser = user?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-        return  loginUser??"";
+        if (int.TryParse(loginUser, out int userId))
+        {
+            return userId;
+        }
 
+        throw new UnauthorizedAccessException("ログインユーザーが特定できません。");
     }
 
 }

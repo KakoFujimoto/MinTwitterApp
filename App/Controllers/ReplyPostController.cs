@@ -3,6 +3,7 @@ using MinTwitterApp.Services;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Enums;
 using MinTwitterApp.Common;
+using MinTwitterApp.Filters;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MinTwitterApp.Controllers;
@@ -29,11 +30,7 @@ public class ReplyPostController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateReply([FromForm] CreateReplyRequest request)
     {
-        var loginUserId = _loginUser.GetUserId();
-        if (!int.TryParse(loginUserId, out int userId))
-        {
-            return Unauthorized("ログインユーザーが特定できません。");
-        }
+        var userId = _loginUser.GetUserId();
 
         var (errorCode, replyPost) = await _replyPostService.ReplyPostAsync(
             userId,

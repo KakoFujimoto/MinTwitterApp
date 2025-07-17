@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.DTO;
 using MinTwitterApp.Common;
+using MinTwitterApp.Filters;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MinTwitterApp.Controllers;
@@ -32,19 +33,15 @@ public class CreatePostController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var currentUserId = int.Parse(_loginUser.GetUserId());
-        var posts = await _viewPostService.GetAllPostsAsync(currentUserId);
 
-        var inputUserId = _loginUser.GetUserId();
-        if (!int.TryParse(inputUserId, out int userId))
-        {
-            return Unauthorized();
-        }
+        int currentUserId = _loginUser.GetUserId();
+
+        var posts = await _viewPostService.GetPostsAsync(currentUserId);
 
         var dto = new CreatePostDTO
         {
             Posts = posts,
-            CurrentUserId = userId
+            CurrentUserId = currentUserId
         };
 
         return View("Create", dto);
@@ -57,8 +54,8 @@ public class CreatePostController : Controller
     {
         if (!ModelState.IsValid)
         {
-            var currentUserId = int.Parse(_loginUser.GetUserId());
-            dto.Posts = await _viewPostService.GetAllPostsAsync(currentUserId);
+            var currentUserId = _loginUser.GetUserId();
+            dto.Posts = await _viewPostService.GetPostsAsync(currentUserId);
             return View("Create", dto);
         }
 
@@ -86,8 +83,8 @@ public class CreatePostController : Controller
 
         if (!ModelState.IsValid)
         {
-            var currentUserId = int.Parse(_loginUser.GetUserId());
-            dto.Posts = await _viewPostService.GetAllPostsAsync(currentUserId);
+            int? currentUserId = _loginUser.GetUserId();
+            dto.Posts = await _viewPostService.GetPostsAsync(currentUserId.Value);
             return View("Create", dto);
         }
 

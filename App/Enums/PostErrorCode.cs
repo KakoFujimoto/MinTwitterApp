@@ -12,5 +12,8 @@ public enum PostErrorCode
 
     // 削除処理用
     NotFound,                 // 投稿が存在しない
-    AlreadyDeleted            // 投稿はすでに削除済み
+    AlreadyDeleted,            // 投稿はすでに削除済み
+
+    // その他のエラー
+    InvalidOperation          // 無効な操作
 }

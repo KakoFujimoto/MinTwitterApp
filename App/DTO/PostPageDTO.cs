@@ -20,12 +20,15 @@ public class PostPageDTO
 
     public int? RepostSourceId { get; set; }
 
+    public int? SourceUserId { get; set; }
+
     public string? SourceUserName { get; set; }
 
     public string? SourceContent { get; set; }
 
     public string? SourceImagePath { get; set; }
 
-    public List<PostPageDTO>? Replies { get; set; }
+    public int? ReplyToPostId { get; set; }
 
+    public List<PostPageDTO> Replies { get; set; } = new();
 }

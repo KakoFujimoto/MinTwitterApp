@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using MinTwitterApp.Common;
+using MinTwitterApp.Filters;
 
 namespace MinTwitterApp.Controllers;
 
@@ -20,18 +21,17 @@ public class ViewPostController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        if (!int.TryParse(_loginuser.GetUserId(), out var currentUserId))
-        {
-            return BadRequest("ユーザーIDが無効です。");
-        }
-        var posts = await _viewPostService.GetAllPostsAsync(currentUserId);
+        var currentUserId = _loginuser.GetUserId();
+
+        var posts = await _viewPostService.GetPostsAsync(currentUserId);
         return View("Index", posts);
     }
 
+    // 使われていない…
     [HttpGet("ViewPost/User/{userId}")]
     public async Task<IActionResult> ByUser(int userId)
     {
         var posts = await _viewPostService.GetPostsByUserIdAsync(userId);
-        return View("UserPosts", posts); // Views/ViewPost/UserPosts.cshtml を想定
+        return View("UserPosts", posts);
     }
 }

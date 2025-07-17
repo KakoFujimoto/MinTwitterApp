@@ -1,38 +1,103 @@
-@using MinTwitterApp.Common
-@model MinTwitterApp.DTO.CreatePostDTO
-@inject LoginUser loginUser
+@model MinTwitterApp.DTO.UserProfilePageDTO
 
 @{
-    ViewData["Title"] = "新規投稿";
+    ViewData["Title"] = "プロフィール";
 }
-<h2>NewPost</h2>
 
-<div asp-validation-summary="All" class="text-danger"></div>
-<form asp-controller="CreatePost" method="post" enctype="multipart/form-data">
-    <div class="form-group">
-        <label asp-for="Content" class="control-label">内容</label>
-        <textarea asp-for="Content" class="form-control"></textarea>
-        <span asp-validation-for="Content" class="text-danger"></span>
-    </div>
+<h2>@Model.Profile.Name さんのプロフィール</h2>
 
-    <div class="form-group">
-        <label asp-for="ImageFile">画像をアップロード(※jpg, png, gif)</label>
-        <input asp-for="ImageFile" type="file" class="form-control" />
-    </div>
+<div class="mb-3">
+    <p>
+        <a asp-controller="FollowRelationship" asp-action="Following" asp-route-id="@Model.Profile.UserId">
+            フォロー中: @Model.Profile.FollowingCount 人
+        </a>
+    </p>
+    <p>
+        <a asp-controller="FollowRelationship" asp-action="Followers" asp-route-id="@Model.Profile.UserId">
+            フォロワー: <span id="followerCount">@Model.Profile.FollowerCount</span> 人
+        </a>
+    </p>
+    <p>アカウント作成日: @Model.Profile.CreatedAt.ToString("yyyy/MM/dd")</p>
 
-    <button type="submit" class="btn btn-primary">投稿</button>
-</form>
+    @if (!Model.IsCurrentUser)
+    {
+        <button class="btn btn-primary followBtn" data-user-id="@Model.Profile.UserId" disabled>読み込み中..</button>
+    }
+</div>
 
-<hr>
+<hr />
 
-<h3>Posts</h3>
-
-@await Component.InvokeAsync("PostList", new { posts = Model.Posts, currentUserId = Model.CurrentUserId })
+<h3>投稿一覧</h3>
+@await Component.InvokeAsync("PostList", new { posts = Model.Posts, currentUserId = Model.CurrentUserId})
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const buttons = document.querySelector(".followBtn");
+            if (!buttons) return;
+            const targetUserId = buttons.dataset.userId;
+            const followerCountSpan = document.getElementById("followerCount");
+
+
+            // フォロー状態を取得
+            fetch(`/api/FollowUser/IsFollowing/${targetUserId}`, {
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(isFollowing => {
+                    updateButton(isFollowing);
+                    buttons.disabled = false;
+                })
+                .catch(() => {
+                    alert("フォロー状態の取得に失敗しました");
+                    buttons.disabled = true;
+                });
+
+            buttons.addEventListener("click", () => {
+                buttons.disabled = true;
+
+                fetch('/api/FollowUser/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ targetUserId: targetUserId })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.errorCode === 0) {
+                            updateButton(data.isFollowing);
+                            alert(data.isFollowing ? "フォローしました。" : "フォロー解除しました。");
+                            // フォロワー数の更新
+                            let count = parseInt(followerCountSpan.textContent);
+                            count = data.isFollowing ? count + 1 : count - 1;
+                            followerCountSpan.textContent = count;
+                        } else {
+                            alert("フォロー処理に失敗しました。");
+                        }
+                        buttons.disabled = false;
+                    })
+                    .catch((error) => {
+                        console.error("フォロー処理中にエラーが発生", error);
+                        alert("フォロー処理に失敗しました。");
+                        buttons.disabled = false;
+                    });
+            });
+
+            function updateButton(isFollowing) {
+                if (isFollowing) {
+                    buttons.textContent = "フォロー解除";
+                    buttons.classList.remove("btn-primary");
+                    buttons.classList.add("btn-secondary");
+                } else {
+                    buttons.textContent = "フォローする";
+                    buttons.classList.remove("btn-secondary");
+                    buttons.classList.add("btn-primary");
+                }
+            }
+        });
+    </script>
 
     <script>
         function toggleEdit(postId) {

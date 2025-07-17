@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MinTwitterApp.Services;
 using MinTwitterApp.Common;
+using MinTwitterApp.Filters;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MinTwitterApp.Controllers;
@@ -23,10 +24,8 @@ public class RePostController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(int originalPostId)
     {
-        if (!int.TryParse(_loginUser.GetUserId(), out int userId))
-        {
-            return Unauthorized();
-        }
+
+        var userId = _loginUser.GetUserId();
 
         var (errorCode, repostDto) = await _rePostService.RePostAsync(userId, originalPostId);
 

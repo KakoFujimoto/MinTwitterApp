@@ -40,17 +40,21 @@ else
                                     </a>
                                 }
                             </p>
+                            <p class="content">@post.Content</p>
                         </div>
                     }
 
                     @* 本文と画像 *@
-                    @if (!string.IsNullOrEmpty(post.ImagePath))
+                    @if (post.RepostSourceId == null)
                     {
-                        <a href="@post.ImagePath" target="_blank">
-                            <img src="@post.ImagePath" class="post-image" />
-                        </a>
+                            @if (!string.IsNullOrEmpty(post.ImagePath))
+                                {
+                                    <a href="@post.ImagePath" target="_blank">
+                                        <img src="@post.ImagePath" class="post-image" />
+                                    </a>
+                                }
+                        <p class="content">@post.Content</p>
                     }
-                    <p class="content">@post.Content</p>
 
                     @* リポストでも通常投稿でも返信は表示する *@
                     @if (post.Replies != null && post.Replies.Any())
